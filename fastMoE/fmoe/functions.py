@@ -118,8 +118,7 @@ class MOEScatter(Function):
                 world_size,
             )
         else:
-            print("*"*1000)
-            print("MOEScatter py")            
+            print(world_size)
             global_input_buf = local_input_buf
         ctx.moe_args = inp.shape[0], pos.shape[0], world_size
         variables = (pos, local_expert_count, global_expert_count)
