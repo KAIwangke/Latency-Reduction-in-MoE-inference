@@ -47,7 +47,6 @@ def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, *
         topk = gate.shape[1]
 
     def scatter_func(tensor):
-        print("actual scatter")
         return MOEScatter.apply(
             tensor,
             torch.div(pos, topk, rounding_mode='floor'),

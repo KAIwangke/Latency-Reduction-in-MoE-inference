@@ -109,8 +109,7 @@ class MOEScatter(Function):
     ):
         local_input_buf = _local_scatter(inp, pos)
         if world_size > 1:
-            print("*"*1000)
-            print("MOEScatter py")
+
             global_input_buf = fmoe_cuda.global_scatter(
                 local_input_buf,
                 local_expert_count,
@@ -119,6 +118,8 @@ class MOEScatter(Function):
                 world_size,
             )
         else:
+            print("*"*1000)
+            print("MOEScatter py")            
             global_input_buf = local_input_buf
         ctx.moe_args = inp.shape[0], pos.shape[0], world_size
         variables = (pos, local_expert_count, global_expert_count)
