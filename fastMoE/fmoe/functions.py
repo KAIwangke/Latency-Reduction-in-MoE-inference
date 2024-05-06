@@ -76,7 +76,9 @@ def prepare_forward(gate, num_expert, world_size):
 
 
 def _local_scatter(inp, pos):
+    print("local scatter")
     inp_buf = torch.index_select(inp, 0, pos)
+    
     return inp_buf
 
 
@@ -118,7 +120,6 @@ class MOEScatter(Function):
                 world_size,
             )
         else:
-            print(world_size)
             global_input_buf = local_input_buf
         ctx.moe_args = inp.shape[0], pos.shape[0], world_size
         variables = (pos, local_expert_count, global_expert_count)
