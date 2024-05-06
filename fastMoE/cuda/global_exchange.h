@@ -1,5 +1,7 @@
 #include "stream_manager.h"
 #ifdef FMOE_USE_NCCL
+#include <iostream>
+
 
 void fmoe_cuda_expert_exchange_impl(
         const long* local_expert_count,
