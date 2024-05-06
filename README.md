@@ -30,7 +30,7 @@ Utilize the token-level expert selection patterns across MoE layers, as observed
 During the profiling stage, collect the expert selection results for each token when the load balancing loss is minimized and stable.
 Group tokens based on their selected experts in the past few layers to form a unique sample path.
 Compute the expert popularity distribution for the next layer based on the sample paths.
-Implement this estimation logic in a new file, e.g., expert_popularity_estimator.cu.
+Implement this estimation logic in a new file, e.g., `expert_popularity_estimator.cu`.
 
 
 ## Two-phase scheduling:
