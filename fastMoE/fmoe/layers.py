@@ -55,7 +55,7 @@ def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, *
             fwd_batch_size,
             world_size,
         )
-
+    print("_fmoe_general_global_forward")
     x = tree.map_structure(scatter_func, inp)
 
     x = expert_fn(x, fwd_expert_count)
