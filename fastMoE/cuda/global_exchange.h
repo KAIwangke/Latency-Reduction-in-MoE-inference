@@ -29,6 +29,7 @@ void fmoe_cuda_global_scatter_impl(
         NCCL_SAFE_CALL(ncclGroupStart());
         for (size_t j = 0; j < world_size; ++j) {
             int idx = i + j * n_expert;
+            std::cout<<"idx for which expert: "<<idx<<endl;
             if (local_expert_count[idx]) {
                 NCCL_SAFE_CALL(ncclSend(
                         local_input_buf + expert_ptr[idx] * in_feat,
