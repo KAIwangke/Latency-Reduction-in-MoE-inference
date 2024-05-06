@@ -19,7 +19,7 @@ void fmoe_cuda_global_scatter_impl(
     scalar_t* input_buf,
     size_t in_feat, size_t n_expert, size_t world_size,
     CudaStreamManager* smgr) {
-    cout<<"getting into the function fmoe_cuda_expert_exchange_impl"<<endl;
+    printf("getting into the function fmoe_cuda_expert_exchange_impl");
 
     
     // assert world_size > 1
@@ -35,7 +35,7 @@ void fmoe_cuda_global_scatter_impl(
         NCCL_SAFE_CALL(ncclGroupStart());
         for (size_t j = 0; j < world_size; ++j) {
             int idx = i + j * n_expert;
-            std::cout<<"idx for which expert: "<<idx<<std::endl;
+            printf("idx for which expert: %d",idx);
             if (local_expert_count[idx]) {
                 NCCL_SAFE_CALL(ncclSend(
                         local_input_buf + expert_ptr[idx] * in_feat,
