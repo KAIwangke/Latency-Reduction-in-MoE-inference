@@ -15,7 +15,7 @@ bash scripts/run_enwik8_base_moe.sh train
 
 
 
-
+https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/index.html
 
 
 
