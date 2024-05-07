@@ -33,9 +33,9 @@ def model_provider(args):
     """Build the model."""
 
     transformer_config = TransformerConfig(
-        num_layers=args.n_layer,
-        hidden_size=args.d_model,
-        num_attention_heads=args.n_head,
+        num_layers=args.num_layers,
+        hidden_size=args.hidden_size,
+        num_attention_heads=args.num_attention_heads,
         use_cpu_initialization=True,
         pipeline_dtype=torch.float32)
 
@@ -43,7 +43,7 @@ def model_provider(args):
         config=transformer_config,
         transformer_layer_spec=get_gpt_layer_local_spec(),
         vocab_size=100,
-        max_sequence_length=args.tgt_len)
+        max_sequence_length=args.seq_length)
 
     
     gpt_model = fmoefy(gpt_model, fmoe_num_experts=args.moe_num_expert)
