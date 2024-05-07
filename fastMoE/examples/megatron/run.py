@@ -135,7 +135,7 @@ if __name__ == "__main__":
     initialize_distributed(tensor_model_parallel_size=2, pipeline_model_parallel_size=1)
     model_parallel_cuda_manual_seed(123)
 
-    gpt_model = model_provider()
+    gpt_model = model_provider(args)
     device = torch.device("cuda")
     gpt_model.to(device)
 
