@@ -131,7 +131,7 @@ if __name__ == "__main__":
         hidden_size=8,
         num_attention_heads=2,
         max_position_embeddings=512,
-        tokenizer_type='BertWordPieceTokenizer',
+        tokenizer_type='GPT2BPETokenizer',
         fp16=False,
         tensor_model_parallel_size=1,
         pipeline_model_parallel_size=1,
@@ -148,4 +148,4 @@ if __name__ == "__main__":
     set_global_variables(extra_args_provider=None, args_defaults=defaults)
 
     pretrain(train_valid_test_datasets_provider, model_provider, forward_step,
-             args_defaults={'tokenizer_type': 'GPT2BPETokenizer'})
+             args_defaults={})
