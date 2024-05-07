@@ -141,8 +141,7 @@ if __name__ == "__main__":
         tensor_model_parallel_size=1,
         pipeline_model_parallel_size=1,
         lr=0.25,
-        seq_length=512,
-        padded_vocab_size = 50257
+        seq_length=512
     )
 
     # Convert Namespace to dictionary
