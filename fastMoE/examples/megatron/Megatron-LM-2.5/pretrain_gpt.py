@@ -27,6 +27,7 @@ from megatron.model import GPTModel
 from megatron.training import pretrain
 from megatron.utils import get_ltor_masks_and_position_ids
 from megatron.utils import average_losses_across_data_parallel_group
+from fmoe.megatron.layers import fmoefy
 
 def model_provider(pre_process=True, post_process=True):
     """Build the model."""
@@ -38,6 +39,9 @@ def model_provider(pre_process=True, post_process=True):
         pre_process=pre_process,
         post_process=post_process
     )
+
+    model = fmoefy(model, 8, megatron_version = "v2.5")
+
     return model
 
 
@@ -137,6 +141,7 @@ if __name__ == "__main__":
         pipeline_model_parallel_size=1,
         lr=0.25,
         seq_length=512,
+        padded_vocab_size = 197
     )
 
     # Convert Namespace to dictionary
