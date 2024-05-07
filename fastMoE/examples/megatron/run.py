@@ -27,13 +27,13 @@ def initialize_distributed(tensor_model_parallel_size = 1, pipeline_model_parall
     # Megatron core distributed training initialization
     parallel_state.initialize_model_parallel(tensor_model_parallel_size, pipeline_model_parallel_size)
 
-def model_provider(args):
+def model_provider():
     """Build the model."""
 
     transformer_config = TransformerConfig(
-        num_layers=args.n_layer,
-        hidden_size=args.d_model,
-        num_attention_heads=args.n_head,
+        num_layers=3,
+        hidden_size=8,
+        num_attention_heads=2,
         use_cpu_initialization=True,
         pipeline_dtype=torch.float32)
 
@@ -41,11 +41,11 @@ def model_provider(args):
         config=transformer_config,
         transformer_layer_spec=get_gpt_layer_local_spec(),
         vocab_size=100,
-        max_sequence_length=args.tgt_len)
+        max_sequence_length=512)
 
 
     # explicit specify the moe model
-    gpt_model = fmoefy(gpt_model, fmoe_num_experts=args.moe_num_expert)
+    gpt_model = fmoefy(gpt_model, fmoe_num_experts=8)
 
     return gpt_model
 
@@ -108,14 +108,8 @@ from argparse import Namespace
 if __name__ == "__main__":
     initialize_distributed(tensor_model_parallel_size=2, pipeline_model_parallel_size=1)
     model_parallel_cuda_manual_seed(123)
-    args_def = Namespace(
-        n_layer=3,
-        d_model=8,
-        n_head=2,
-        tgt_len=512,
-        moe_num_expert=10
-    )
-    gpt_model = model_provider(args=args_def)
+
+    gpt_model = model_provider()
     device = torch.device("cuda")
     gpt_model.to(device)
 
