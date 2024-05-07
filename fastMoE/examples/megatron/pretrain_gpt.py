@@ -145,7 +145,7 @@ if __name__ == "__main__":
     # Pass the dictionary to parse_args
     # parsed_args = parse_args(extra_args_provider=None, defaults=defaults)
 
-    set_global_variables(extra_args_provider=None, args_defaults=defaults)
+    # set_global_variables(extra_args_provider=None, args_defaults=defaults)
 
     pretrain(train_valid_test_datasets_provider, model_provider, forward_step,
              args_defaults=defaults)
