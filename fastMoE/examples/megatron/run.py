@@ -110,6 +110,7 @@ if __name__ == "__main__":
 
     # Create your Namespace object
     args = Namespace(
+        moe_num_expert = 8,
         micro_batch_size=4,
         num_layers=3,
         hidden_size=8,
@@ -120,8 +121,7 @@ if __name__ == "__main__":
         tensor_model_parallel_size=1,
         pipeline_model_parallel_size=1,
         lr=0.25,
-        seq_length=512,
-        moe_num_expert = 8
+        seq_length=512
     )
 
     # Convert Namespace to dictionary
