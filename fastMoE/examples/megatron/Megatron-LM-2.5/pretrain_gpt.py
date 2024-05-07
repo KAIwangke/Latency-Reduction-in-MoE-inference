@@ -141,7 +141,9 @@ if __name__ == "__main__":
         tensor_model_parallel_size=1,
         pipeline_model_parallel_size=1,
         lr=0.25,
-        seq_length=512
+        seq_length=512,
+        ffn_hidden_size=256,  # Add this line
+        num_experts=8  # Add this line        
     )
 
     # Convert Namespace to dictionary
