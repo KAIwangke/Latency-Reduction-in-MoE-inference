@@ -17,9 +17,7 @@ from megatron.core.datasets.gpt_dataset import GPTDatasetConfig, MockGPTDataset
 from megatron.global_vars import set_global_variables
 from fmoe.megatron.layers import fmoefy
 
-def initialize_distributed(args):
-    parallel_state.destroy_model_parallel()
-
+def initialize_distributed(tensor_model_parallel_size = 1, pipeline_model_parallel_size = 1):
     # Torch setup for distributed training
     rank = int(os.environ['LOCAL_RANK'])
     world_size = torch.cuda.device_count()
@@ -27,8 +25,10 @@ def initialize_distributed(args):
     torch.distributed.init_process_group(world_size=world_size, rank=rank)
 
     # Megatron core distributed training initialization
-    parallel_state.initialize_model_parallel(args.tensor_model_parallel_size, args.pipeline_model_parallel_size)
+    parallel_state.initialize_model_parallel(tensor_model_parallel_size, pipeline_model_parallel_size)
 
+
+    
 def model_provider(args):
     """Build the model."""
 
