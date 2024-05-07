@@ -133,7 +133,7 @@ if __name__ == "__main__":
     args = Namespace(
         micro_batch_size=4,
         num_layers=3,
-        hidden_size=8,
+        hidden_size=64,
         num_attention_heads=2,
         max_position_embeddings=512,
         tokenizer_type='GPT2BPETokenizer',
