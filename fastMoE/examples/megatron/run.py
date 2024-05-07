@@ -10,10 +10,10 @@ from megatron.core import dist_checkpointing
 from megatron.core.pipeline_parallel.schedules import get_forward_backward_func
 from megatron.core.tensor_parallel.random import model_parallel_cuda_manual_seed
 from megatron.core.transformer.transformer_config import TransformerConfig
-from megatron.core.model.language_model import TransformerLanguageModel, get_language_model
+from megatron.core.models.language_model import TransformerLanguageModel, get_language_model
 # from megatron.core.models.gpt.gpt_layer_specs import get_gpt_layer_local_spec
-from megatron.model.enums import LayerType, AttnMaskType
-from megatron.model.utils import init_method_normal, scaled_init_method_normal
+from megatron.models.enums import LayerType, AttnMaskType
+from megatron.models.utils import init_method_normal, scaled_init_method_normal
 
 from megatron.core.datasets.utils import Split
 from megatron.core.datasets.gpt_dataset import GPTDatasetConfig, MockGPTDataset
