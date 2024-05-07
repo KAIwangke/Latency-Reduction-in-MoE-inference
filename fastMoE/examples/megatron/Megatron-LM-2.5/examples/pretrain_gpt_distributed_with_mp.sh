@@ -10,8 +10,8 @@ NNODES=1
 NODE_RANK=0
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
-DATA_PATH=<Specify path and file prefix>_text_document
-CHECKPOINT_PATH=<Specify path>
+# DATA_PATH=<Specify path and file prefix>_text_document
+# CHECKPOINT_PATH=<Specify path>
 
 DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT"
 
@@ -28,9 +28,9 @@ python -m torch.distributed.launch $DISTRIBUTED_ARGS \
        --max-position-embeddings 1024 \
        --train-iters 500000 \
        --lr-decay-iters 320000 \
-       --save $CHECKPOINT_PATH \
-       --load $CHECKPOINT_PATH \
-       --data-path $DATA_PATH \
+       # --save $CHECKPOINT_PATH \
+       # --load $CHECKPOINT_PATH \
+       # --data-path $DATA_PATH \
        --vocab-file gpt2-vocab.json \
        --merge-file gpt2-merges.txt \
        --data-impl mmap \
