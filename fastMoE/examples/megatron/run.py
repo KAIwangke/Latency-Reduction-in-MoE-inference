@@ -126,14 +126,8 @@ if __name__ == "__main__":
     # Convert Namespace to dictionary
     defaults = vars(args)
 
-    # Parse arguments and set defaults
-    parsed_args = parse_args(extra_args_provider=None)
-    args_dict = vars(parsed_args)
-    for key, value in defaults.items():
-        if key not in args_dict or args_dict[key] is None:
-            setattr(parsed_args, key, value)
-        elif parsed_args.rank == 0:
-            print(f'WARNING: overriding default argument for {key}: {args_dict[key]} with {value}', flush=True)
+    # Pass the dictionary to parse_args
+    parsed_args = parse_args(extra_args_provider=None, defaults=defaults)
 
     set_global_variables(extra_args_provider=None, args_defaults=parsed_args)
 
