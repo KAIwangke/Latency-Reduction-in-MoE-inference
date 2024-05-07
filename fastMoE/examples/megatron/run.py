@@ -17,6 +17,9 @@ from megatron.core.datasets.gpt_dataset import GPTDatasetConfig, MockGPTDataset
 from megatron.global_vars import set_global_variables
 from fmoe.megatron.layers import fmoefy
 
+
+exit()
+
 def initialize_distributed(tensor_model_parallel_size = 1, pipeline_model_parallel_size = 1):
     # Torch setup for distributed training
     rank = int(os.environ['LOCAL_RANK'])

@@ -66,7 +66,6 @@ class GPTModel(MegatronModule):
                  pre_process=True,
                  post_process=True):
         
-        print("calling GPT model")
         super(GPTModel, self).__init__()
         args = get_args()
 
