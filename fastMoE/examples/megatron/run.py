@@ -17,7 +17,9 @@ from megatron.core.datasets.gpt_dataset import GPTDatasetConfig, MockGPTDataset
 from megatron.global_vars import set_global_variables
 from fmoe.megatron.layers import fmoefy
 
-def initialize_distributed(tensor_model_parallel_size = 1, pipeline_model_parallel_size = 1):
+def initialize_distributed(args):
+    parallel_state.destroy_model_parallel()
+
     # Torch setup for distributed training
     rank = int(os.environ['LOCAL_RANK'])
     world_size = torch.cuda.device_count()
@@ -25,15 +27,15 @@ def initialize_distributed(tensor_model_parallel_size = 1, pipeline_model_parall
     torch.distributed.init_process_group(world_size=world_size, rank=rank)
 
     # Megatron core distributed training initialization
-    parallel_state.initialize_model_parallel(tensor_model_parallel_size, pipeline_model_parallel_size)
+    parallel_state.initialize_model_parallel(args.tensor_model_parallel_size, args.pipeline_model_parallel_size)
 
-def model_provider():
+def model_provider(args):
     """Build the model."""
 
     transformer_config = TransformerConfig(
-        num_layers=3,
-        hidden_size=8,
-        num_attention_heads=2,
+        num_layers=args.n_layer,
+        hidden_size=args.d_model,
+        num_attention_heads=args.n_head,
         use_cpu_initialization=True,
         pipeline_dtype=torch.float32)
 
@@ -41,11 +43,10 @@ def model_provider():
         config=transformer_config,
         transformer_layer_spec=get_gpt_layer_local_spec(),
         vocab_size=100,
-        max_sequence_length=512,micro_batch_size = 12)
+        max_sequence_length=args.tgt_len)
 
-
-    # explicit specify the moe model
-    gpt_model = fmoefy(gpt_model, fmoe_num_experts=8)
+    
+    gpt_model = fmoefy(gpt_model, fmoe_num_experts=args.moe_num_expert)
 
     return gpt_model
 
@@ -102,46 +103,62 @@ def load_distributed_checkpoint(checkpoint_path, gpt_model):
     gpt_model.load_state_dict(checkpoint)
     return gpt_model
 
-from argparse import Namespace
-
-
 if __name__ == "__main__":
-    initialize_distributed(tensor_model_parallel_size=2, pipeline_model_parallel_size=1)
+    # Parse command-line arguments
+    from megatron.arguments import parse_args
+    args = parse_args(extra_args_provider=None,
+                      defaults={
+                          'micro_batch_size': 4,
+                          'num_layers': 3,
+                          'hidden_size': 8,
+                          'num_attention_heads': 2,
+                          'max_position_embeddings': 512,
+                          'tokenizer_type': 'BertWordPieceTokenizer',
+                          'fp16': False,
+                          'tensor_model_parallel_size': 1,
+                          'pipeline_model_parallel_size': 1,
+                          'lr': 0.25,
+                          'seq_length': 512,
+                      })
+    set_global_variables(extra_args_provider=None, args_defaults=args)
+
+    initialize_distributed()
     model_parallel_cuda_manual_seed(123)
-    from megatron.global_vars import set_global_variables
-    set_global_variables()
+
     gpt_model = model_provider()
     device = torch.device("cuda")
     gpt_model.to(device)
 
-    optim = Adam(gpt_model.parameters())
+    optim = Adam(gpt_model.parameters(), lr=args.lr)
 
     train_iterator = get_train_data_iterator()
 
     forward_backward_func = get_forward_backward_func()
 
-    # Running the model for 5 iterations
-    for _ in range(5):
+    # Running the model for the desired number of iterations
+    for _ in range(args.max_steps):
         optim.zero_grad()
 
         losses_reduced = forward_backward_func(
             forward_step_func=forward_step_func,
             data_iterator=train_iterator,
             model=gpt_model,
-            num_microbatches=1,
-            seq_length=64,
-            micro_batch_size=8,
-            decoder_seq_length=64,
+            num_microbatches=args.batch_size // args.micro_batch_size,
+            seq_length=args.seq_length,
+            micro_batch_size=args.micro_batch_size,
+            decoder_seq_length=args.seq_length,
             forward_only=False)
 
         optim.step()
 
-        print(f'Losses reduced :{losses_reduced}')
+        print(f'Losses reduced :  {losses_reduced}')
 
     # Saving the model
-    save_distributed_checkpoint(gpt_model=gpt_model, checkpoint_path='/workspace/ckpt')
+    ckpt_path = os.getcwd() + '/ckpt'
+    Path(ckpt_path).mkdir(exist_ok=True)
+    save_distributed_checkpoint(gpt_model=gpt_model, checkpoint_path=ckpt_path)
 
     # Loading the model
-    gpt_model = load_distributed_checkpoint(gpt_model=gpt_model, checkpoint_path='/workspace/ckpt')
+    gpt_model = load_distributed_checkpoint(gpt_model=gpt_model, checkpoint_path=ckpt_path)
     gpt_model.to(device)
     print('Successfully loaded the model')
