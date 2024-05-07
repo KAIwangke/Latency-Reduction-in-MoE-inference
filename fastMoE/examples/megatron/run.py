@@ -41,11 +41,11 @@ def model_provider():
         config=transformer_config,
         transformer_layer_spec=get_gpt_layer_local_spec(),
         vocab_size=100,
-        max_sequence_length=512)
+        max_sequence_length=512,micro_batch_size = 12)
 
 
     # explicit specify the moe model
-    gpt_model = fmoefy(gpt_model, fmoe_num_experts=8,micro_batch_size = 12)
+    gpt_model = fmoefy(gpt_model, fmoe_num_experts=8)
 
     return gpt_model
 
