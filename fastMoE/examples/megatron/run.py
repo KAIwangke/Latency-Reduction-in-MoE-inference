@@ -45,7 +45,7 @@ def model_provider():
 
 
     # explicit specify the moe model
-    gpt_model = fmoefy(gpt_model, fmoe_num_experts=8)
+    gpt_model = fmoefy(gpt_model, fmoe_num_experts=8,micro_batch_size = 12)
 
     return gpt_model
 
