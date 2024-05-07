@@ -10,7 +10,7 @@ NNODES=1
 NODE_RANK=0
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
-# DATA_PATH=<Specify path and file prefix>_text_document
+DATA_PATH=codeparrot_content_document
 # CHECKPOINT_PATH=<Specify path>
 
 DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT"
@@ -30,11 +30,11 @@ torchrun $DISTRIBUTED_ARGS \
        --lr-decay-iters 320000 \
        # --save $CHECKPOINT_PATH \
        # --load $CHECKPOINT_PATH \
-       # --data-path $DATA_PATH \
-       # --vocab-file vocab.json \
-       # --merge-file merges.txt \
-       # --data-impl mmap \
-       # --split 949,50,1 \
+       --data-path $DATA_PATH \
+       --vocab-file vocab.json \
+       --merge-file merges.txt \
+       --data-impl mmap \
+       --split 949,50,1 \
        --distributed-backend nccl \
        --lr 0.00015 \
        --lr-decay-style cosine \
@@ -48,5 +48,4 @@ torchrun $DISTRIBUTED_ARGS \
        --eval-interval 1000 \
        --eval-iters 10 \
        --fp16 \ 
-       --padded_vocab_size 24
 
