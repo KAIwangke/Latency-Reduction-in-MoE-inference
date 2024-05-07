@@ -148,4 +148,4 @@ if __name__ == "__main__":
     set_global_variables(extra_args_provider=None, args_defaults=defaults)
 
     pretrain(train_valid_test_datasets_provider, model_provider, forward_step,
-             args_defaults={})
+             args_defaults=defaults)
