@@ -38,13 +38,15 @@ def model_provider(pre_process=True, post_process=True):
         parallel_output=True,
         pre_process=pre_process,
         post_process=post_process
-        # padded_vocab_size = 50257
     )
 
-    model = fmoefy(model, 8, megatron_version = "v2.5")
+    # Add this check
+    if not hasattr(args, 'ffn_hidden_size') or args.ffn_hidden_size is None or args.ffn_hidden_size <= 0:
+        raise ValueError("ffn_hidden_size must be a positive integer")
+
+    model = fmoefy(model, args.num_experts, megatron_version="v2.5", d_hidden=args.ffn_hidden_size)
 
     return model
-
 
 def get_batch(data_iterator):
     """Generate a batch"""
