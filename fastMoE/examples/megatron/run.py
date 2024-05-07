@@ -108,14 +108,14 @@ from argparse import Namespace
 if __name__ == "__main__":
     initialize_distributed(tensor_model_parallel_size=2, pipeline_model_parallel_size=1)
     model_parallel_cuda_manual_seed(123)
-    args = Namespace(
+    args_def = Namespace(
         n_layer=3,
         d_model=8,
         n_head=2,
         tgt_len=512,
         moe_num_expert=10
     )
-    gpt_model = model_provider()
+    gpt_model = model_provider(args=args_def)
     device = torch.device("cuda")
     gpt_model.to(device)
 
