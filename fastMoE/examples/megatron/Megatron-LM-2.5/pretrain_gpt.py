@@ -40,11 +40,11 @@ def model_provider(pre_process=True, post_process=True):
         post_process=post_process
     )
 
-    # Add this check
+    # Check if args.ffn_hidden_size is a positive integer
     if not hasattr(args, 'ffn_hidden_size') or args.ffn_hidden_size is None or args.ffn_hidden_size <= 0:
         raise ValueError("ffn_hidden_size must be a positive integer")
 
-    model = fmoefy(model, args.num_experts, megatron_version="v2.5", d_hidden=args.ffn_hidden_size)
+    model = fmoefy(model, args.num_experts, megatron_version="v2.5")
 
     return model
 
