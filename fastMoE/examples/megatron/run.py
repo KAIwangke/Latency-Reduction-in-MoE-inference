@@ -127,9 +127,9 @@ if __name__ == "__main__":
     defaults = vars(args)
 
     # Pass the dictionary to parse_args
-    parsed_args = parse_args(extra_args_provider=None, defaults=defaults)
+    # parsed_args = parse_args(extra_args_provider=None, defaults=defaults)
 
-    set_global_variables(extra_args_provider=None, args_defaults=parsed_args)
+    set_global_variables(extra_args_provider=None, args_defaults=defaults)
 
     initialize_distributed()
     model_parallel_cuda_manual_seed(123)
