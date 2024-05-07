@@ -45,6 +45,8 @@ def model_provider(args):
         vocab_size=100,
         max_sequence_length=args.tgt_len)
 
+
+    # explicit specify the moe model
     gpt_model = fmoefy(gpt_model, fmoe_num_experts=args.moe_num_expert)
 
     return gpt_model
@@ -102,62 +104,43 @@ def load_distributed_checkpoint(checkpoint_path, gpt_model):
     gpt_model.load_state_dict(checkpoint)
     return gpt_model
 
-if __name__ == "__main__":
-    # Parse command-line arguments
-    from megatron.arguments import parse_args
-    args = parse_args(extra_args_provider=None,
-                      defaults={
-                          'micro_batch_size': 4,
-                          'num_layers': 3,
-                          'hidden_size': 8,
-                          'num_attention_heads': 2,
-                          'max_position_embeddings': 512,
-                          'tokenizer_type': 'BertWordPieceTokenizer',
-                          'fp16': False,
-                          'tensor_model_parallel_size': 1,
-                          'pipeline_model_parallel_size': 1,
-                          'lr': 0.25,
-                          'seq_length': 512,
-                      })
-    set_global_variables(extra_args_provider=None, args_defaults=args)
 
-    initialize_distributed()
+if __name__ == "__main__":
+    initialize_distributed(tensor_model_parallel_size=2, pipeline_model_parallel_size=1)
     model_parallel_cuda_manual_seed(123)
 
     gpt_model = model_provider()
     device = torch.device("cuda")
     gpt_model.to(device)
 
-    optim = Adam(gpt_model.parameters(), lr=args.lr)
+    optim = Adam(gpt_model.parameters())
 
     train_iterator = get_train_data_iterator()
 
     forward_backward_func = get_forward_backward_func()
 
-    # Running the model for the desired number of iterations
-    for _ in range(args.max_steps):
+    # Running the model for 5 iterations
+    for _ in range(5):
         optim.zero_grad()
 
         losses_reduced = forward_backward_func(
             forward_step_func=forward_step_func,
             data_iterator=train_iterator,
             model=gpt_model,
-            num_microbatches=args.batch_size // args.micro_batch_size,
-            seq_length=args.seq_length,
-            micro_batch_size=args.micro_batch_size,
-            decoder_seq_length=args.seq_length,
+            num_microbatches=1,
+            seq_length=64,
+            micro_batch_size=8,
+            decoder_seq_length=64,
             forward_only=False)
 
         optim.step()
 
-        print(f'Losses reduced :  {losses_reduced}')
+        print(f'Losses reduced :{losses_reduced}')
 
     # Saving the model
-    ckpt_path = os.getcwd() + '/ckpt'
-    Path(ckpt_path).mkdir(exist_ok=True)
-    save_distributed_checkpoint(gpt_model=gpt_model, checkpoint_path=ckpt_path)
+    save_distributed_checkpoint(gpt_model=gpt_model, checkpoint_path='/workspace/ckpt')
 
     # Loading the model
-    gpt_model = load_distributed_checkpoint(gpt_model=gpt_model, checkpoint_path=ckpt_path)
+    gpt_model = load_distributed_checkpoint(gpt_model=gpt_model, checkpoint_path='/workspace/ckpt')
     gpt_model.to(device)
     print('Successfully loaded the model')
