@@ -44,6 +44,9 @@ def model_provider(args):
         transformer_layer_spec=get_gpt_layer_local_spec(),
         vocab_size=100,
         max_sequence_length=args.seq_length)
+    
+    print(gpt_model.language_model)
+    exit()
 
     
     gpt_model = fmoefy(gpt_model, 8, megatron_version = "v2.5")
