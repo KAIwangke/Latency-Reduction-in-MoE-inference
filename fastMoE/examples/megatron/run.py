@@ -108,7 +108,8 @@ from argparse import Namespace
 if __name__ == "__main__":
     initialize_distributed(tensor_model_parallel_size=2, pipeline_model_parallel_size=1)
     model_parallel_cuda_manual_seed(123)
-
+    from megatron.global_vars import set_global_variables
+    set_global_variables()
     gpt_model = model_provider()
     device = torch.device("cuda")
     gpt_model.to(device)
