@@ -26,6 +26,13 @@ def get_moe_group():
 
 
 def count_by_gate(gate, num_expert, world_size, require_pos=True):
+    """
+    Args: 
+        gate: Tensor, gating layer output
+        num_expert: int, number of experts
+        world_size: int, number of GPUs
+        require_pos: bool, pos tensor required
+    """
     with torch.no_grad():
         local_expert_count = torch.zeros(
             num_expert * world_size, device=gate.device, dtype=torch.int32

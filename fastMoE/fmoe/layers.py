@@ -22,7 +22,7 @@ def mark_module_parallel_comm(module, comm):
     for p in module.parameters():
         setattr(p, "dp_comm", comm)
 
-
+#def dynamic_gate():
 def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, **kwargs):
     r"""
     A private function that performs the following steps to complete the MoE
@@ -43,9 +43,12 @@ def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, *
         fwd_batch_size,
     ) = prepare_forward(gate, num_expert, world_size)
     topk = 1
+    print("inp.size",inp.size())
+    print("pos size",pos.size())
+    print("pos",pos)
+
     if len(gate.shape) == 2:
         topk = gate.shape[1]
-
     def scatter_func(tensor):
         return MOEScatter.apply(
             tensor,
@@ -203,6 +206,13 @@ class FMoE(nn.Module):
             else:
                 mark_module_parallel_comm(self.experts, comm)
         mark_module_parallel_comm(self.gate, "gate")
+    
+    def dynamic_gate(self, inp, gate_idx):
+        print(gate_idx)
+        optimal_index = torch.argsort(gate_idx,dim=0,stable=True)
+        print(torch.index_select(inp,0,optimal_index[0]))
+        
+        return gate_idx
 
     def forward(self, moe_inp, layer_idx=None):
         r"""
@@ -239,7 +249,9 @@ class FMoE(nn.Module):
         '''
         # print("forward func layer idx : ",layer_idx)
         gate_top_k_idx, gate_score = self.gate(moe_inp, layer_idx=layer_idx)
-        
+        print("moe_inp",moe_inp.size())
+        gate_top_k_idx = self.dynamic_gate(moe_inp,gate_top_k_idx)
+
         if self.gate_hook is not None:
             self.gate_hook(gate_top_k_idx, gate_score, None)
 
