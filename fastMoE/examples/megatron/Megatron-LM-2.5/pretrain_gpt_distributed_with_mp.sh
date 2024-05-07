@@ -31,10 +31,10 @@ torchrun $DISTRIBUTED_ARGS \
        # --save $CHECKPOINT_PATH \
        # --load $CHECKPOINT_PATH \
        # --data-path $DATA_PATH \
-       --vocab-file vocab.json \
-       --merge-file merges.txt \
-       --data-impl mmap \
-       --split 949,50,1 \
+       # --vocab-file vocab.json \
+       # --merge-file merges.txt \
+       # --data-impl mmap \
+       # --split 949,50,1 \
        --distributed-backend nccl \
        --lr 0.00015 \
        --lr-decay-style cosine \
