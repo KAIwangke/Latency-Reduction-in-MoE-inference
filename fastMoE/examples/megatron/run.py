@@ -106,9 +106,9 @@ def load_distributed_checkpoint(checkpoint_path, gpt_model):
 if __name__ == "__main__":
     # Parse command-line arguments
     from megatron.arguments import parse_args
+    from argparse import Namespace
 
     # Create your Namespace object
-    from argparse import Namespace
     args = Namespace(
         micro_batch_size=4,
         num_layers=3,
