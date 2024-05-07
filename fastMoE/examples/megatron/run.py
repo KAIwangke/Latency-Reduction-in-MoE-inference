@@ -131,7 +131,8 @@ if __name__ == "__main__":
 
     set_global_variables(extra_args_provider=None, args_defaults=defaults)
 
-    initialize_distributed()
+    # initialize_distributed()
+    initialize_distributed(tensor_model_parallel_size=2, pipeline_model_parallel_size=1)
     model_parallel_cuda_manual_seed(123)
 
     gpt_model = model_provider()
