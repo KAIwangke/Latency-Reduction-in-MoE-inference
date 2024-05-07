@@ -37,8 +37,8 @@ def model_provider(pre_process=True, post_process=True):
         num_tokentypes=0,
         parallel_output=True,
         pre_process=pre_process,
-        post_process=post_process,
-        padded_vocab_size = 50257
+        post_process=post_process
+        # padded_vocab_size = 50257
     )
 
     model = fmoefy(model, 8, megatron_version = "v2.5")
