@@ -106,21 +106,30 @@ def load_distributed_checkpoint(checkpoint_path, gpt_model):
 if __name__ == "__main__":
     # Parse command-line arguments
     from megatron.arguments import parse_args
-    args = parse_args(extra_args_provider=None,
-                      defaults={
-                          'micro_batch_size': 4,
-                          'num_layers': 3,
-                          'hidden_size': 8,
-                          'num_attention_heads': 2,
-                          'max_position_embeddings': 512,
-                          'tokenizer_type': 'BertWordPieceTokenizer',
-                          'fp16': False,
-                          'tensor_model_parallel_size': 1,
-                          'pipeline_model_parallel_size': 1,
-                          'lr': 0.25,
-                          'seq_length': 512,
-                      })
-    set_global_variables(extra_args_provider=None, args_defaults=args)
+
+    # Create your Namespace object
+    from argparse import Namespace
+    args = Namespace(
+        micro_batch_size=4,
+        num_layers=3,
+        hidden_size=8,
+        num_attention_heads=2,
+        max_position_embeddings=512,
+        tokenizer_type='BertWordPieceTokenizer',
+        fp16=False,
+        tensor_model_parallel_size=1,
+        pipeline_model_parallel_size=1,
+        lr=0.25,
+        seq_length=512
+    )
+
+    # Convert Namespace to dictionary
+    defaults = vars(args)
+
+    # Pass the dictionary to parse_args
+    parsed_args = parse_args(extra_args_provider=None, defaults=defaults)
+
+    set_global_variables(extra_args_provider=None, args_defaults=parsed_args)
 
     initialize_distributed()
     model_parallel_cuda_manual_seed(123)
