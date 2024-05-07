@@ -119,7 +119,7 @@ if __name__ == "__main__":
                           'lr': 0.25,
                           'seq_length': 512,
                       })
-    set_global_variables(args)  # Pass args as a keyword argument
+    set_global_variables(extra_args_provider=None, args_defaults=args)
 
     initialize_distributed()
     model_parallel_cuda_manual_seed(123)
