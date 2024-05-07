@@ -46,7 +46,7 @@ def model_provider(args):
         max_sequence_length=args.seq_length)
 
     
-    gpt_model = fmoefy(gpt_model, fmoe_num_experts=args.moe_num_expert)
+    gpt_model = fmoefy(gpt_model, fmoe_num_experts=8)
 
     return gpt_model
 
