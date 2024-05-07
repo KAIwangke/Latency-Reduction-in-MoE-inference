@@ -18,7 +18,7 @@ from megatron.global_vars import set_global_variables
 from fmoe.megatron.layers import fmoefy
 
 
-exit()
+# exit()
 
 def initialize_distributed(tensor_model_parallel_size = 1, pipeline_model_parallel_size = 1):
     # Torch setup for distributed training

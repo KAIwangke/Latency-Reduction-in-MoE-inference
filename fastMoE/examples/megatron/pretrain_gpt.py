@@ -120,6 +120,32 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
 
 
 if __name__ == "__main__":
+    from megatron.arguments import parse_args
+    from megatron.global_vars import set_global_variables
+    from argparse import Namespace
+
+    # Create your Namespace object
+    args = Namespace(
+        micro_batch_size=4,
+        num_layers=3,
+        hidden_size=8,
+        num_attention_heads=2,
+        max_position_embeddings=512,
+        tokenizer_type='BertWordPieceTokenizer',
+        fp16=False,
+        tensor_model_parallel_size=1,
+        pipeline_model_parallel_size=1,
+        lr=0.25,
+        seq_length=512,
+    )
+
+    # Convert Namespace to dictionary
+    defaults = vars(args)
+
+    # Pass the dictionary to parse_args
+    # parsed_args = parse_args(extra_args_provider=None, defaults=defaults)
+
+    set_global_variables(extra_args_provider=None, args_defaults=defaults)
 
     pretrain(train_valid_test_datasets_provider, model_provider, forward_step,
              args_defaults={'tokenizer_type': 'GPT2BPETokenizer'})
