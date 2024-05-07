@@ -102,11 +102,19 @@ def load_distributed_checkpoint(checkpoint_path, gpt_model):
     gpt_model.load_state_dict(checkpoint)
     return gpt_model
 
+from argparse import Namespace
+
 
 if __name__ == "__main__":
     initialize_distributed(tensor_model_parallel_size=2, pipeline_model_parallel_size=1)
     model_parallel_cuda_manual_seed(123)
-
+    args = Namespace(
+        n_layer=3,
+        d_model=8,
+        n_head=2,
+        tgt_len=512,
+        moe_num_expert=10
+    )
     gpt_model = model_provider()
     device = torch.device("cuda")
     gpt_model.to(device)
