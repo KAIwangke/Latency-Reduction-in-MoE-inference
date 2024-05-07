@@ -144,7 +144,7 @@ if __name__ == "__main__":
         pipeline_model_parallel_size=1,
         lr=0.25,
         seq_length=512,
-        ffn_hidden_size=256,  # Add this line
+        out_feat=256,  # Add this line
         num_experts=8  # Add this line        
     )
 
