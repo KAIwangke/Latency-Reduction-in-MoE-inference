@@ -10,11 +10,8 @@ from megatron.core import dist_checkpointing
 from megatron.core.pipeline_parallel.schedules import get_forward_backward_func
 from megatron.core.tensor_parallel.random import model_parallel_cuda_manual_seed
 from megatron.core.transformer.transformer_config import TransformerConfig
-from megatron.core.models.language_model import TransformerLanguageModel, get_language_model
-# from megatron.core.models.gpt.gpt_layer_specs import get_gpt_layer_local_spec
-from megatron.models.enums import LayerType, AttnMaskType
-from megatron.models.utils import init_method_normal, scaled_init_method_normal
-
+from megatron.core.models.gpt.gpt_model import GPTModel
+from megatron.core.models.gpt.gpt_layer_specs import get_gpt_layer_local_spec
 from megatron.core.datasets.utils import Split
 from megatron.core.datasets.gpt_dataset import GPTDatasetConfig, MockGPTDataset
 from megatron.global_vars import set_global_variables
@@ -35,7 +32,6 @@ def initialize_distributed(tensor_model_parallel_size = 1, pipeline_model_parall
 def model_provider(args):
     """Build the model."""
 
-    # Assuming 'args' includes all necessary transformer configurations
     transformer_config = TransformerConfig(
         num_layers=args.num_layers,
         hidden_size=args.hidden_size,
@@ -43,27 +39,16 @@ def model_provider(args):
         use_cpu_initialization=True,
         pipeline_dtype=torch.float32)
 
-    # Initialize the language model
-    init_method = init_method_normal(std=args.init_method_std)
-    scaled_init_method = scaled_init_method_normal(std=args.init_method_std, num_layers=args.num_layers)
+    gpt_model = GPTModel(
+        config=transformer_config,
+        transformer_layer_spec=get_gpt_layer_local_spec(),
+        vocab_size=100,
+        max_sequence_length=args.seq_length)
 
-    # Create the language model
-    language_model, _ = get_language_model(
-        num_tokentypes=2,  # Example: Change as needed
-        add_pooler=True,   # If you want a pooler layer at the top of the transformer
-        encoder_attn_mask_type=AttnMaskType.padding,  # Attention mask type
-        init_method=init_method,
-        scaled_init_method=scaled_init_method,
-        add_decoder=False,  # Set to True if you need decoder layers for seq2seq tasks
-        decoder_attn_mask_type=AttnMaskType.causal,  # Only needed if add_decoder is True
-        pre_process=True,
-        post_process=True
-    )
+    
+    gpt_model = fmoefy(gpt_model, 8, megatron_version = "v2.5")
 
-    # Optionally apply Fast MoE
-    language_model = fmoefy(language_model, 8)  # The second parameter '8' might be the number of experts
-
-    return language_model
+    return gpt_model
 
 def get_train_data_iterator(args):
     config = GPTDatasetConfig(
