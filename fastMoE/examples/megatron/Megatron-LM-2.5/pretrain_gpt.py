@@ -101,8 +101,9 @@ def forward_step(data_iterator, model):
     output_tensor = model(tokens, position_ids, attention_mask,
                           labels=labels)
 
-    return output_tensor, partial(loss_func, loss_mask)
+    bal_loss = None  # Placeholder for bal_loss
 
+    return output_tensor, partial(loss_func, loss_mask), bal_loss
 
 def train_valid_test_datasets_provider(train_val_test_num_samples):
     """Build train, valid, and test datasets."""
