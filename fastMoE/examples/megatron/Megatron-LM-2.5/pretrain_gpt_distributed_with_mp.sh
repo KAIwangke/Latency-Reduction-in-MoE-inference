@@ -48,6 +48,7 @@ torchrun $DISTRIBUTED_ARGS \
        --save-interval 10000 \
        --eval-interval 1000 \
        --eval-iters 10 \
+       --fmoefy 1 \
        --num-experts 4\
        --fp16
 
