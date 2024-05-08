@@ -101,21 +101,7 @@ def forward_step(data_iterator, model):
     output_tensor = model(tokens, position_ids, attention_mask,
                           labels=labels)
 
-    def loss_func(loss_mask, output_tensor):
-        losses = output_tensor.float()
-        loss_mask = loss_mask.view(-1).float()
-        loss = torch.sum(losses.view(-1) * loss_mask) / loss_mask.sum()
-
-        # If you have data parallel reduce loss across data parallel groups.
-        # If pipeline parallel, loss computation is done only in last stage.
-        averaged_loss = average_losses_across_data_parallel_group([loss])
-
-        return loss, {'lm loss': averaged_loss[0]}
-
-    # Calculate bal_loss
-    bal_loss = None  # Replace this with the actual calculation of bal_loss
-
-    return output_tensor, loss_func, bal_loss
+    return output_tensor, partial(loss_func, loss_mask)
 
 
 def train_valid_test_datasets_provider(train_val_test_num_samples):
