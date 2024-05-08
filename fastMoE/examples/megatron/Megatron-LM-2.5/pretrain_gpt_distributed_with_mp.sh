@@ -17,6 +17,7 @@ DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $
 
 torchrun $DISTRIBUTED_ARGS \
        pretrain_gpt.py \
+       --trainning-sample 1000\
        --tensor-model-parallel-size 2 \
        --pipeline-model-parallel-size 2 \
        --num-layers 24 \
