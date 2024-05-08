@@ -28,6 +28,8 @@ torchrun $DISTRIBUTED_ARGS \
        --max-position-embeddings 1024 \
        --train-iters 500000 \
        --lr-decay-iters 320000 \
+       --save $CHECKPOINT_PATH \
+       --load $CHECKPOINT_PATH \
        --data-path $DATA_PATH \
        --vocab-file vocab.json \
        --merge-file merges.txt \
@@ -45,5 +47,5 @@ torchrun $DISTRIBUTED_ARGS \
        --save-interval 10000 \
        --eval-interval 1000 \
        --eval-iters 10 \
-       --fp16 \ 
+       --fp16
 
