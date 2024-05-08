@@ -6,22 +6,11 @@
 /* 
  * note that due to limit of cuda atomic operator, capacity should be int32
  */
-
-/*
-expert_count_ack: A new tensor, created empty but with the same properties as expert_count, to store the result.
-smgr: Retrieves a CUDA stream manager associated with the device of the expert_count tensor, used for managing CUDA streams to ensure efficient computation.
-fmoe_cuda_limit_by_capacity_impl: A custom CUDA function likely defined in balancing.cuh that performs the actual computation to adjust expert capacities based on given constraints.
-
-*/
 torch::Tensor _limit_by_capacity(
         torch::Tensor expert_count, torch::Tensor capacity,
         long n_expert, long n_worker) {
-            
-    // CHECK_INPUT: A macro or function likely provided by PyTorch 
-    // to ensure the input tensors are properly allocated and available.
     CHECK_INPUT(expert_count);
     CHECK_INPUT(capacity);
-    
     auto expert_count_ack = torch::empty_like(expert_count);
     auto smgr = getCudaStreamManager(expert_count.device().index());
     fmoe_cuda_limit_by_capacity_impl(

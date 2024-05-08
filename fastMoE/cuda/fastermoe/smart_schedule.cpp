@@ -4,8 +4,6 @@
 #include <vector>
 #include <torch/extension.h>
 #include <c10/cuda/CUDAGuard.h>
-using namespace std;
-
 
 #include "smart_schedule.h"
 #include "status.h"
@@ -104,7 +102,6 @@ std::vector<torch::Tensor> _smart_sch_forward(
     for (long i = 0; i < num_expert * n_workers; ++i) {
         if (stored_models_[i]) {
             torch::Tensor t = input_buf.new_empty({expert_size});
-    
             if (i / num_expert == rank) {
                 get_param_fn(t, i % num_expert);
             }
