@@ -37,6 +37,7 @@ torchrun $DISTRIBUTED_ARGS \
        --split 949,50,1 \
        --distributed-backend nccl \
        --lr 0.00015 \
+       --ffn_hidden_size 256\
        --lr-decay-style cosine \
        --min-lr 1.0e-5 \
        --weight-decay 1e-2 \
