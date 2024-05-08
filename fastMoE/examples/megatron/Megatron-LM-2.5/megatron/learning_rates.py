@@ -29,7 +29,7 @@ class AnnealingLR(object):
 
         # Class values.
         self.optimizer = optimizer
-
+        max_lr = 0.01
         self.max_lr = float(max_lr)
         self.min_lr = min_lr
         assert self.min_lr >= 0.0
