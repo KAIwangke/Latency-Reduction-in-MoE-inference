@@ -15,7 +15,7 @@ CHECKPOINT_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/
 
 DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT"
 
-python -m torch.distributed.run $DISTRIBUTED_ARGS \
+python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        pretrain_gpt.py \
        --tensor-model-parallel-size 2 \
        --pipeline-model-parallel-size 2 \
