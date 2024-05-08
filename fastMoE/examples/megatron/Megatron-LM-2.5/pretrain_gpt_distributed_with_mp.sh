@@ -32,6 +32,7 @@ torchrun $DISTRIBUTED_ARGS \
        --load $CHECKPOINT_PATH \
        --data-path $DATA_PATH \
        --vocab-file vocab.json \
+       --hidden_hidden_size 256\
        --merge-file merges.txt \
        --data-impl mmap \
        --split 949,50,1 \
