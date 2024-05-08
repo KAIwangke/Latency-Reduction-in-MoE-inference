@@ -2,17 +2,17 @@
 
 if [[ $1 == 'train' ]]; then
     echo 'Run training...'
-    python train.py \
+    python3 train.py \
         --cuda \
         --data ../data/one-billion-words/ \
         --dataset lm1b \
         --adaptive \
-        --n_layer 18 \
-        --d_model 1024 \
+        --n_layer 3 \
+        --d_model 32 \
         --div_val 4 \
         --n_head 8 \
-        --d_head 128 \
-        --d_inner 4096 \
+        --d_head 8 \
+        --d_inner 256 \
         --dropout 0.0 \
         --dropatt 0.0 \
         --optim adam \
@@ -28,7 +28,7 @@ if [[ $1 == 'train' ]]; then
         ${@:2}
 elif [[ $1 == 'eval' ]]; then
     echo 'Run evaluation...'
-    python eval.py \
+    python3 eval.py \
         --cuda \
         --data ../data/one-billion-words/ \
         --dataset lm1b \

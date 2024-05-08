@@ -36,8 +36,8 @@ class NaiveGate(BaseGate):
         # Get the index of the first chosen expert for each token
         chosen_experts = gate_top_k_idx[..., 0]
         # Print the chosen experts for each token at the current layer
-        if layer_idx is not None:
-            print(f"Chosen experts at layer {layer_idx}:",chosen_experts)
+        #if layer_idx is not None:
+        #    print(f"Chosen experts at layer {layer_idx}:",chosen_experts)
     
 
         gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
