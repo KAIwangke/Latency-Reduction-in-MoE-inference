@@ -799,7 +799,7 @@ def build_train_valid_test_data_iterators(
 
     # Data loader only on rank 0 of each model parallel group.
     if mpu.get_tensor_model_parallel_rank() == 0:
-
+        args.train_samples=100
         # Number of train/valid/test samples.
         if args.train_samples:
             train_samples = args.train_samples

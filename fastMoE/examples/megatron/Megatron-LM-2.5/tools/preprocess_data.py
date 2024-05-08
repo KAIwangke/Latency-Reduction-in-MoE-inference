@@ -195,8 +195,6 @@ def main():
             print(f"Processed {i} documents",
                   f"({i/elapsed} docs/s, {mbs} MB/s).",
                   file=sys.stderr)
-        if i > 100:
-            break
 
     for key in args.json_keys:
         builders[key].finalize(output_idx_files[key])
