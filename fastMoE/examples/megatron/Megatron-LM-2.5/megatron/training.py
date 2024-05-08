@@ -118,6 +118,7 @@ def pretrain(train_valid_test_dataset_provider,
 
     print("!"*100)
     print(args.fmoefy)
+    args.fmoefy = True
     # Initialize FastMoE
     if args.fmoefy:
         from fmoe.megatron import patch_forward_step, patch_model_provider
