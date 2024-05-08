@@ -48,4 +48,5 @@ torchrun $DISTRIBUTED_ARGS \
        --eval-interval 1000 \
        --eval-iters 10 \
        --fp16 \ 
+       --max_lr 0.01
 
