@@ -59,13 +59,7 @@ def forward_step(forward_step_func, data_iterator, model, input_tensor, losses_r
         model, (torchDDP, LocalDDP, Float16Module))
     unwrapped_model.set_input_tensor(input_tensor)
     output_tensor, loss_func, bal_loss = forward_step_func(data_iterator, model)
-
-    # Handle the case where bal_loss is None
-    if bal_loss is None:
-        bal_loss = 0.0
-
     bal_loss = bal_loss / get_num_microbatches()
-
     if mpu.is_pipeline_last_stage():
         output_tensor = loss_func(output_tensor)
         loss, loss_reduced = output_tensor
@@ -74,6 +68,7 @@ def forward_step(forward_step_func, data_iterator, model, input_tensor, losses_r
     timers('forward-compute').stop()
 
     return output_tensor, bal_loss
+
 
 def backward_step(optimizer, input_tensor, output_tensor, output_tensor_grad, bal_loss):
     """Backward step through passed-in output tensor.

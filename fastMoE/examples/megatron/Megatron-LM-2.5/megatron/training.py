@@ -115,7 +115,7 @@ def pretrain(train_valid_test_dataset_provider,
 
     args = get_args()
     timers = get_timers()
-
+    print(args.fmoefy)
     # Initialize FastMoE
     if args.fmoefy:
         from fmoe.megatron import patch_forward_step, patch_model_provider
