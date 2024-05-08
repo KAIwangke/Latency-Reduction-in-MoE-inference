@@ -40,7 +40,7 @@ def model_provider(pre_process=True, post_process=True):
         pre_process=pre_process,
         post_process=post_process
     )
-    model = fmoefy(model, 4, hidden_hidden_size=4096, megatron_version="v2.5")
+    model = fmoefy(model, 4, hidden_hidden_size=64, megatron_version="v2.5")
 
     return model
 
