@@ -28,6 +28,8 @@ from megatron.training import pretrain
 from megatron.utils import get_ltor_masks_and_position_ids
 from megatron.utils import average_losses_across_data_parallel_group
 
+from fmoe.megatron.layers import fmoefy
+
 def model_provider(pre_process=True, post_process=True):
     """Build the model."""
 
@@ -38,6 +40,8 @@ def model_provider(pre_process=True, post_process=True):
         pre_process=pre_process,
         post_process=post_process
     )
+    model = fmoefy(model, 4, megatron_version="v2.5")
+
     return model
 
 
