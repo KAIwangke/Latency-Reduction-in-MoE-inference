@@ -1,5 +1,8 @@
 #include "stream_manager.h"
 #ifdef FMOE_USE_NCCL
+#include <iostream>
+using namespace std;
+
 
 void fmoe_cuda_expert_exchange_impl(
         const long* local_expert_count,
@@ -16,6 +19,9 @@ void fmoe_cuda_global_scatter_impl(
     scalar_t* input_buf,
     size_t in_feat, size_t n_expert, size_t world_size,
     CudaStreamManager* smgr) {
+    printf("getting into the function fmoe_cuda_expert_exchange_impl");
+
+    
     // assert world_size > 1
     int recv_ptr = 0;
     /* TODO: may save for backward */
@@ -29,6 +35,7 @@ void fmoe_cuda_global_scatter_impl(
         NCCL_SAFE_CALL(ncclGroupStart());
         for (size_t j = 0; j < world_size; ++j) {
             int idx = i + j * n_expert;
+            printf("idx for which expert: %d",idx);
             if (local_expert_count[idx]) {
                 NCCL_SAFE_CALL(ncclSend(
                         local_input_buf + expert_ptr[idx] * in_feat,

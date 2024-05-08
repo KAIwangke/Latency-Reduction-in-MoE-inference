@@ -135,6 +135,7 @@ class MOEScatter(Function):
         else:
             local_input_buf = _local_scatter(inp, pos)
         if world_size > 1:
+
             global_input_buf = fmoe_cuda.global_scatter(
                 local_input_buf,
                 local_expert_count,
