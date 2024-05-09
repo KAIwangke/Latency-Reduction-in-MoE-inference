@@ -61,51 +61,14 @@ def patch_loss_func_v2_5(loss_func):
 
     return loss_func_with_balance_loss
 
-def patch_forward_step(forward_step_func, Megatron_Version="v2.2"):
+def patch_forward_step(forward_step_func, Megatron_Version="v2.5"):
     r"""
     Patch model's forward_step_func to support balance loss
     """
 
-    from megatron.mpu import is_pipeline_last_stage
-    from megatron.mpu import get_tensor_model_parallel_group
     from megatron import get_args
 
-    if not get_args().balance_strategy:
-        return forward_step_func
 
-    def forward_step_with_balance_loss_v2_2(data_iterator, model, input_tensor):
-        args = get_args()
-        output = forward_step_func(data_iterator, model, input_tensor)
-
-        if not is_pipeline_last_stage() or not args.balance_strategy:
-            return output
-
-        while hasattr(model, 'module'):
-            model = model.module
-
-        loss_list = [l.mlp.gate.get_loss(clear=False).view(1)
-                for l in model.language_model.transformer.layers
-                if l.mlp.gate.has_loss]
-        if len(loss_list) == 0:
-            return output
-
-        loss_name = args.balance_strategy + "_loss"
-        (loss, state_dict), bal_loss = (
-            output,
-            torch.cat(loss_list).mean() * args.balance_loss_weight
-        )
-
-        # avarage across moe group
-        moe_group = get_tensor_model_parallel_group()
-        world_size = torch.distributed.get_world_size(group=moe_group)
-        averaged_bal_loss = bal_loss.clone().detach()
-        torch.distributed.all_reduce(averaged_bal_loss, group=moe_group)
-        averaged_bal_loss /= world_size
-
-        loss += bal_loss
-        state_dict[loss_name] = averaged_bal_loss
-
-        return loss, state_dict
 
     def forward_step_with_balance_loss_v2_5(data_iterator, model):
         from functools import partial
@@ -121,14 +84,8 @@ def patch_forward_step(forward_step_func, Megatron_Version="v2.2"):
         bal_loss = torch.cat(loss_list).mean() * get_args().balance_loss_weight / get_args().pipeline_model_parallel_size
         return output, partial(patch_loss_func_v2_5(loss_func), model), bal_loss
 
-    if Megatron_Version == "v2.2":
-        return forward_step_with_balance_loss_v2_2
-    elif Megatron_Version == "v2.5":
-        return forward_step_with_balance_loss_v2_5
-    elif Megatron_Version == "v3.0.2":
-        return forward_step_with_balance_loss_v2_5
-    else:
-        assert False, f"megatron version {Megatron_Version} not known."
+
+    return forward_step_with_balance_loss_v2_5
 
 
 
