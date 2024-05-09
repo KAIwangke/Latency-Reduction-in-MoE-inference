@@ -15,6 +15,8 @@ _moe_group = None
 
 def ensure_comm(t, comm):
     if comm is None:
+        print("*"*100)
+        print("comm is none")
         comm = get_torch_default_comm()
     global _moe_group
     _moe_group = comm
@@ -76,8 +78,6 @@ def prepare_forward(gate, num_expert, world_size):
 
 
 def _local_scatter(inp, pos):
-    print("*"*100)
-    print("local Scatter")
     inp_buf = torch.index_select(inp, 0, pos)
     return inp_buf
 
