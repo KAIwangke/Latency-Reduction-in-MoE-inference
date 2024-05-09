@@ -56,9 +56,6 @@ torch::Tensor _global_scatter(
     auto in_feat = input_buf.size(1);
     auto global_input_buf = input_buf.new_empty({batch_size, in_feat});
     auto smgr = getCudaStreamManager(input_buf.device().index());
-    printf("************************************************************************************");
-    printf("global_scatter");
-    printf("************************************************************************************");
 
     AT_DISPATCH_FLOATING_TYPES_AND2(at::ScalarType::Half, at::ScalarType::BFloat16,
             input_buf.scalar_type(), "fmoe_cuda_global_scatter", ([&] {

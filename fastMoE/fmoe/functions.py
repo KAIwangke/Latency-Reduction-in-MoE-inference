@@ -76,6 +76,8 @@ def prepare_forward(gate, num_expert, world_size):
 
 
 def _local_scatter(inp, pos):
+    print("*"*100)
+    print("local Scatter")
     inp_buf = torch.index_select(inp, 0, pos)
     return inp_buf
 
