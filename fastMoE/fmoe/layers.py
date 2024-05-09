@@ -208,7 +208,9 @@ class FMoE(nn.Module):
         The FMoE module first computes gate output, and then conduct MoE forward
         according to the gate.  The score of the selected gate given by the
         expert is multiplied to the experts' output tensors as a weight.
-        """
+        """ 
+        print("*"*1000)
+        print("world size check")
 
         moe_inp_batch_size = tree.flatten(
             tree.map_structure(lambda tensor: tensor.shape[0], moe_inp)
@@ -218,8 +220,6 @@ class FMoE(nn.Module):
         ), "MoE inputs must have the same batch size"
 
         if self.world_size > 1:
-            print("*"*100)
-            print("expert parallel")    
             def ensure_comm_func(tensor):
                 ensure_comm(tensor, self.moe_group)
 
