@@ -75,14 +75,16 @@ class MegatronMLP(FMoETransformerMLP):
     """
 
     def __init__(self, args, layer_idx, gate=None):
-        if not args.distributed_experts:
-            world_size = 1
-            moe_group = None
-        else:
-            world_size = args.data_parallel_size
-            from megatron.mpu import get_data_parallel_group
-            moe_group = get_data_parallel_group()
-
+        # if not args.distributed_experts:
+        #     world_size = 1
+        #     moe_group = None
+        # else:
+        world_size = args.data_parallel_size
+        from megatron.mpu import get_data_parallel_group
+        moe_group = get_data_parallel_group()
+        
+        
+        args.balance_strategy = "naive"
         if not args.balance_strategy or args.balance_strategy == "naive":
             from fmoe.gates import NaiveGate
             gate = NaiveGate
