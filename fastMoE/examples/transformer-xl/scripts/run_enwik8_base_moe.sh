@@ -7,6 +7,7 @@ if [[ $1 == 'train' ]]; then
         --data ../enwik8/ \
         --dataset enwik8 \
         --n_layer 3 \
+        --world_size 2\
         --d_model 8 \
         --n_head 2 \
         --d_head 4 \
@@ -31,7 +32,6 @@ elif [[ $1 == 'eval' ]]; then
         --cuda \
         --data ../enwik8/ \
         --dataset enwik8 \
-        --world_size 2\
         --tgt_len 512 \
         --mem_len 512 \
         --clamp_len 820 \
