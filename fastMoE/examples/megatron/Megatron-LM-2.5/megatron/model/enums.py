@@ -13,11 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .fused_layer_norm import MixedFusedLayerNorm as LayerNorm
+import enum
 
-from .distributed import DistributedDataParallel
-from .bert_model import BertModel
-from .gpt_model import GPTModel
-from .t5_model import T5Model
-from .language_model import get_language_model
-from .module import Float16Module
+class LayerType(enum.Enum):
+    encoder = 1
+    decoder = 2
+ 
+class AttnType(enum.Enum):
+    self_attn = 1
+    cross_attn = 2
+
+class AttnMaskType(enum.Enum):
+    padding = 1
+    causal = 2

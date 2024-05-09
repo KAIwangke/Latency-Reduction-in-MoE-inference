@@ -26,9 +26,13 @@ import torch.nn.functional as F
 from megatron import get_args
 from megatron import get_tokenizer
 from megatron import mpu
-from megatron.training import communicate
-from megatron.utils import get_ltor_masks_and_position_ids
+from megatron.utils import get_ltor_masks_and_position_ids, unwrap_model
+from megatron.p2p_communication import recv_forward, send_forward
 
+# These are needed to unwrap the model, would be nice to put these in megatron.utils if possible?
+from torch.nn.parallel.distributed import DistributedDataParallel as torchDDP
+from megatron.model import DistributedDataParallel as LocalDDP
+from megatron.model import Float16Module
 
 def get_batch(context_tokens):
     """Generate batch from context tokens."""
@@ -185,6 +189,37 @@ def generate_samples_input_from_file(model):
 
             raw_text = None
             context_count += 1
+
+# We added this function to support the tasks evaluation such as squad
+# and drop in the https://github.com/EleutherAI/lm-evaluation-harness 
+# codebase. The lm-evaluation-harness code can now call this function
+# similar to their current generate function call used for gpt style models.
+def generate_samples_eval(model, context, max_gen_length, eos_token_id):
+    # Generate samples for lm evaluation
+    # NEED TO THINK ABOUT eos token
+
+    args = get_args()
+    tokenizer = get_tokenizer()
+
+    raw_text_len = len(context)
+    model.eval()
+
+    context_tokens = tokenizer.tokenize(context)
+    args.out_seq_length = max_gen_length + len(context_tokens)
+    args.eos_id = eos_token_id
+
+    with torch.no_grad():
+        token_stream = get_token_stream(model, [context_tokens])
+        for counter, decode_tokens in enumerate(token_stream):
+            if counter == args.out_seq_length:
+                break
+
+    decode_tokens, _ = decode_tokens
+    decode_tokens = decode_tokens[0].cpu().numpy().tolist()
+    trim_decode_tokens = tokenizer.detokenize(
+        decode_tokens)[raw_text_len:]
+ 
+    return trim_decode_tokens
 
 
 def generate_samples_interactive(model, print_frequency=24):
@@ -395,55 +430,28 @@ def forward_step(model, tokens, position_ids, attention_mask, tokentype_ids,
                  layer_past=None, get_key_value=None,
                  forward_method_parallel_output=None):
 
-    # Hidden size changes when not using recompute, need to tell communicate()
-    # the correct size
+    # Hidden size changes when not using recompute, need to tell p2p_communicate
+    # functions the correct size
     args = get_args()
     orig_seq_length = args.seq_length
     args.seq_length = tokens.shape[1]
 
-    if not mpu.is_pipeline_first_stage():
-        input_tensor, _ = communicate(
-            tensor_send_next=None,
-            tensor_send_prev=None,
-            recv_forward=True,
-            recv_backward=False)
-    else:
-        input_tensor = None
+    input_tensor = recv_forward()
 
     # Forward pass through the model.
-    if mpu.is_pipeline_first_stage():
-        assert input_tensor is None
-        if mpu.is_pipeline_last_stage():
-            output_tensor = model(tokens, position_ids, attention_mask,
-                                  tokentype_ids=tokentype_ids,
-                                  layer_past=layer_past,
-                                  get_key_value=get_key_value,
-                                  forward_method_parallel_output=forward_method_parallel_output)
-        else:
-            output_tensor = model(tokens, position_ids, attention_mask,
-                                  tokentype_ids=tokentype_ids,
-                                  layer_past=layer_past,
-                                  get_key_value=get_key_value)
-    elif mpu.is_pipeline_last_stage():
-        assert input_tensor is not None
-        output_tensor = model(input_tensor, attention_mask,
-                              layer_past=layer_past,
-                              get_key_value=get_key_value,
-                              forward_method_parallel_output=forward_method_parallel_output)
-    else:
-        assert input_tensor is not None
-        output_tensor = model(input_tensor, attention_mask,
-                              layer_past=layer_past,
-                              get_key_value=get_key_value)
+    unwrapped_model = unwrap_model(
+        model, (torchDDP, LocalDDP, Float16Module))
+    unwrapped_model.set_input_tensor(input_tensor)
+    output_tensor = model(tokens, position_ids, attention_mask,
+                          tokentype_ids=tokentype_ids,
+                          layer_past=layer_past,
+                          get_key_value=get_key_value,
+                          forward_method_parallel_output=forward_method_parallel_output)
 
     if get_key_value:
         output_tensor, layer_past = output_tensor
 
-    if not mpu.is_pipeline_last_stage():
-        communicate(tensor_send_next=output_tensor,
-                    tensor_send_prev=None,
-                    recv_forward=False,
-                    recv_backward=False)
+    send_forward(output_tensor)
 
     args.seq_length = orig_seq_length
     if get_key_value:
@@ -461,7 +469,13 @@ def sample_sequence_batch(model, context_tokens, context_lengths,
     model.eval()
     with torch.no_grad():
         context_length = context_lengths.min().item()
-        eos_id = tokenizer.eod
+
+        # added eos_id to support the function generate_samples_eval that passes
+        # eos_id as an argument and needs termination when that id id found.
+        if hasattr(args, 'eos_id'):
+            eos_id = args.eos_id
+        else:
+            eos_id = tokenizer.eod
 
         counter = 0
         org_context_length = context_length
