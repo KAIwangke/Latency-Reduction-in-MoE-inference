@@ -4,7 +4,6 @@ if [[ $1 == 'train' ]]; then
     echo 'Run training...'
     python3 trainPipelinetest.py \
         --cuda \
-        --world_size 2\
         --data ../enwik8/ \
         --dataset enwik8 \
         --n_layer 3 \
@@ -32,6 +31,7 @@ elif [[ $1 == 'eval' ]]; then
         --cuda \
         --data ../enwik8/ \
         --dataset enwik8 \
+        --world_size 2\
         --tgt_len 512 \
         --mem_len 512 \
         --clamp_len 820 \
