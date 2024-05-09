@@ -32,9 +32,6 @@ _EMBEDDING_GROUP = None
 # Data parallel group that the current rank belongs to.
 _DATA_PARALLEL_GROUP = None
 
-_VIRTUAL_PIPELINE_MODEL_PARALLEL_RANK = None
-_VIRTUAL_PIPELINE_MODEL_PARALLEL_WORLD_SIZE = None
-
 # These values enable us to change the mpu sizes on the fly.
 _MPU_TENSOR_MODEL_PARALLEL_WORLD_SIZE = None
 _MPU_PIPELINE_MODEL_PARALLEL_WORLD_SIZE = None
@@ -51,8 +48,7 @@ def is_unitialized():
 
 
 def initialize_model_parallel(tensor_model_parallel_size_=1,
-                              pipeline_model_parallel_size_=1,
-                              virtual_pipeline_model_parallel_size_=None):
+                              pipeline_model_parallel_size_=1):
     """
     Initialize model data parallel groups.
 
@@ -94,12 +90,6 @@ def initialize_model_parallel(tensor_model_parallel_size_=1,
     num_tensor_model_parallel_groups = world_size // tensor_model_parallel_size
     num_pipeline_model_parallel_groups = world_size // pipeline_model_parallel_size
     num_data_parallel_groups = world_size // data_parallel_size
-
-    if virtual_pipeline_model_parallel_size_ is not None:
-        global _VIRTUAL_PIPELINE_MODEL_PARALLEL_RANK
-        global _VIRTUAL_PIPELINE_MODEL_PARALLEL_WORLD_SIZE
-        _VIRTUAL_PIPELINE_MODEL_PARALLEL_RANK = 0
-        _VIRTUAL_PIPELINE_MODEL_PARALLEL_WORLD_SIZE = virtual_pipeline_model_parallel_size_
 
     rank = torch.distributed.get_rank()
 
@@ -268,44 +258,15 @@ def get_pipeline_model_parallel_rank():
     return torch.distributed.get_rank(group=get_pipeline_model_parallel_group())
 
 
-def is_pipeline_first_stage(ignore_virtual=False):
+def is_pipeline_first_stage():
     """Return True if in the first pipeline model-parallel stage, False otherwise."""
-    if not ignore_virtual:
-        if get_virtual_pipeline_model_parallel_world_size() is not None and \
-            get_virtual_pipeline_model_parallel_rank() != 0:
-            return False
     return get_pipeline_model_parallel_rank() == 0
 
 
-def is_pipeline_last_stage(ignore_virtual=False):
+def is_pipeline_last_stage():
     """Return True if in the last pipeline model-parallel stage, False otherwise."""
-    if not ignore_virtual:
-        virtual_pipeline_model_parallel_world_size = \
-            get_virtual_pipeline_model_parallel_world_size()
-        if virtual_pipeline_model_parallel_world_size is not None and \
-            get_virtual_pipeline_model_parallel_rank() != (
-                virtual_pipeline_model_parallel_world_size - 1):
-            return False
     return get_pipeline_model_parallel_rank() == (
         get_pipeline_model_parallel_world_size() - 1)
-
-
-def get_virtual_pipeline_model_parallel_rank():
-    """Return the virtual pipeline-parallel rank."""
-    global _VIRTUAL_PIPELINE_MODEL_PARALLEL_RANK
-    return _VIRTUAL_PIPELINE_MODEL_PARALLEL_RANK
-
-
-def set_virtual_pipeline_model_parallel_rank(rank):
-    """Set the virtual pipeline-parallel rank."""
-    global _VIRTUAL_PIPELINE_MODEL_PARALLEL_RANK
-    _VIRTUAL_PIPELINE_MODEL_PARALLEL_RANK = rank
-
-
-def get_virtual_pipeline_model_parallel_world_size():
-    """Return the virtual pipeline-parallel world size."""
-    global _VIRTUAL_PIPELINE_MODEL_PARALLEL_WORLD_SIZE
-    return _VIRTUAL_PIPELINE_MODEL_PARALLEL_WORLD_SIZE
 
 
 def get_tensor_model_parallel_src_rank():
@@ -315,12 +276,10 @@ def get_tensor_model_parallel_src_rank():
     local_world_size = get_tensor_model_parallel_world_size()
     return (global_rank // local_world_size) * local_world_size
 
-
 def get_pipeline_model_parallel_first_rank():
     assert _PIPELINE_GLOBAL_RANKS is not None, \
         "Pipeline parallel group is not initialized"
     return _PIPELINE_GLOBAL_RANKS[0]
-
 
 def get_pipeline_model_parallel_last_rank():
     assert _PIPELINE_GLOBAL_RANKS is not None, \
@@ -335,14 +294,12 @@ def get_pipeline_model_parallel_next_rank():
     world_size = get_pipeline_model_parallel_world_size()
     return _PIPELINE_GLOBAL_RANKS[(rank_in_pipeline + 1) % world_size]
 
-
 def get_pipeline_model_parallel_prev_rank():
     assert _PIPELINE_GLOBAL_RANKS is not None, \
         "Pipeline parallel group is not initialized"
     rank_in_pipeline = get_pipeline_model_parallel_rank()
     world_size = get_pipeline_model_parallel_world_size()
     return _PIPELINE_GLOBAL_RANKS[(rank_in_pipeline - 1) % world_size]
-
 
 def get_data_parallel_world_size():
     """Return world size for the data parallel group."""
