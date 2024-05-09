@@ -113,7 +113,7 @@ class FMoE(nn.Module):
         self,
         num_expert=32,
         d_model=1024,
-        world_size=2,
+        world_size=1,
         mp_group=None,  # being deprecated
         slice_group=None,
         moe_group=None,
@@ -209,8 +209,6 @@ class FMoE(nn.Module):
         according to the gate.  The score of the selected gate given by the
         expert is multiplied to the experts' output tensors as a weight.
         """ 
-        print("*"*100)
-        print("world size check",self.world_size)
 
         moe_inp_batch_size = tree.flatten(
             tree.map_structure(lambda tensor: tensor.shape[0], moe_inp)
