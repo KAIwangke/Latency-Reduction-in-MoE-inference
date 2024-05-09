@@ -4,8 +4,8 @@ if [[ $1 == 'train' ]]; then
     echo 'Run training...'
     python3 trainPipelinetest.py \
         --cuda \
-        --data ../one-billion-words/ \
-        --dataset lm1b \
+        --data ../enwik8/ \
+        --dataset enwik8 \
         --n_layer 3 \
         --d_model 8 \
         --n_head 2 \
@@ -21,16 +21,16 @@ if [[ $1 == 'train' ]]; then
         --mem_len 512 \
         --eval_tgt_len 128 \
         --batch_size 16 \
+        --multi_gpu \
         --gpu0_bsz 4 \
-        --multi_gpu \ 
-        --moe --moe-num-expert 8 --moe-top-k 2 
+        --moe --moe-num-expert 8 --moe-top-k 2 \
         ${@:2}
 elif [[ $1 == 'eval' ]]; then
     echo 'Run evaluation...'
     python3 eval.py \
         --cuda \
-        --data ../one-billion-words/ \
-        --dataset lm1b \
+        --data ../enwik8/ \
+        --dataset enwik8 \
         --tgt_len 512 \
         --mem_len 512 \
         --clamp_len 820 \
