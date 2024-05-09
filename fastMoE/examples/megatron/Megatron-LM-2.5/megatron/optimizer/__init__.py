@@ -69,8 +69,10 @@ def get_megatron_optimizer(model):
 
     # Determine whether the params have main-grad field.
     params_have_main_grad = False
-    if args.DDP_impl == 'local':
-        params_have_main_grad = True
+
+    # FastMoE does not have main_grad field
+    # if args.DDP_impl == 'local':
+    #     params_have_main_grad = True
 
     if args.fp16 or args.bf16:
 

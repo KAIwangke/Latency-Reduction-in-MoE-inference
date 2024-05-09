@@ -20,6 +20,9 @@ import os
 
 import torch
 
+# FastMoE
+from fmoe.megatron import add_fmoe_args as _add_fmoe_args
+
 def parse_args(extra_args_provider=None, defaults={},
                ignore_unknown_args=False):
     """Parse all arguments."""
@@ -41,6 +44,9 @@ def parse_args(extra_args_provider=None, defaults={},
     parser = _add_biencoder_args(parser)
     parser = _add_vit_args(parser)
     parser = _add_logging_args(parser)
+
+    # FastMoE arguments.
+    parser = _add_fmoe_args(parser)
 
     # Custom arguments.
     if extra_args_provider is not None:
@@ -232,7 +238,11 @@ def parse_args(extra_args_provider=None, defaults={},
         assert args.checkpoint_activations, \
             'for distribute-checkpointed-activations to work you '\
             'need to enable checkpoint-activations'
-
+    # if fmoe_num_experts is not specified,
+    # we are using lower version of megatron,
+    # copy num_experts to fmoe_num_experts
+    if not hasattr(args, 'fmoe_num_experts'):
+        args.fmoe_num_experts = args.num_experts
     _print_args(args)
     return args
 

@@ -250,6 +250,9 @@ class Float16OptimizerWithFloat16Params(MegatronOptimizer):
                                                                   param)
                         if hasattr(param, 'shared'):
                             main_param.shared = param.shared
+                        # FastMoE
+                        if hasattr(param, 'dp_comm'):
+                            main_param.dp_comm = param.dp_comm
                         # Replace the optimizer params with the new fp32 copy.
                         param_group['params'][i] = main_param
                         fp32_from_float16_params_this_group.append(main_param)
@@ -396,16 +399,25 @@ class Float16OptimizerWithFloat16Params(MegatronOptimizer):
             # so we can update the loss scale.
             self.grad_scaler.update(found_inf_flag)
 
-            # If we found inf/nan, skip the update.
-            if found_inf_flag:
-                return False, None, None
+            # move to L417.
+            # if found_inf_flag:
+            #     return False, None, None
 
         # Clip the main gradients.
         timers('optimizer-clip-main-grad').start()
         grad_norm = None
-        if self.clip_grad > 0.0:
-            grad_norm = self.clip_grad_norm(self.clip_grad)
+        
+        # remove if branch to avoid dead-lock in FastMoE
+        # if self.clip_grad > 0.0:
+        #     grad_norm = self.clip_grad_norm(self.clip_grad)
+        grad_norm = self.clip_grad_norm(self.clip_grad)
+        
         timers('optimizer-clip-main-grad').stop()
+
+        # move early return to here to avoid dead-lock in FastMoE 
+        # If we found inf/nan, skip the update.
+        if found_inf_flag:
+            return False, None, None
 
         # count the zeros in the grads
         num_zeros_in_grad = self.count_zeros() if \

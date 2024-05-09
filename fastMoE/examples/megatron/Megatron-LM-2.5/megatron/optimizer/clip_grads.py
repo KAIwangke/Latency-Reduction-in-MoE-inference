@@ -16,7 +16,7 @@
 """Gradient clipping."""
 
 import torch
-from torch._six import inf
+from torch import inf
 
 from apex.multi_tensor_apply import multi_tensor_applier
 import amp_C
@@ -54,17 +54,23 @@ def clip_grad_norm_fp32(parameters, max_norm, norm_type=2):
     #   - should not be a replica due to tensor model parallelism
     grads = []
     grads_for_norm = []
+    # FastMoE
+    grads_in_moe = []
     for param in parameters:
         grad_not_none = param.grad is not None
         is_not_shared = param_is_not_shared(param)
         is_not_tp_duplicate = param_is_not_tensor_parallel_duplicate(param)
-        grad = param.grad.detach()
         if grad_not_none:
+            grad = param.grad.detach()
             # Make sure the grads are in fp32
             assert param.grad.type() == 'torch.cuda.FloatTensor'
             grads.append(grad)
         if grad_not_none and is_not_shared and is_not_tp_duplicate:
-            grads_for_norm.append(grad)
+            # FastMoE
+            if hasattr(param, 'dp_comm') and param.dp_comm in ('none'):
+                grads_in_moe.append(grad)
+            else:
+                grads_for_norm.append(grad)
 
     # Norm parameters.
     max_norm = float(max_norm)
@@ -73,6 +79,8 @@ def clip_grad_norm_fp32(parameters, max_norm, norm_type=2):
 
     # Calculate norm.
     if norm_type == inf:
+        # FastMoE TODO
+        assert False, f"norm_type {norm_type} is not supported by FastMoE "
         total_norm = max(grad.abs().max() for grad in grads_for_norm)
         total_norm_cuda = torch.cuda.FloatTensor([float(total_norm)])
         # Take max across all model-parallel GPUs.
@@ -97,7 +105,20 @@ def clip_grad_norm_fp32(parameters, max_norm, norm_type=2):
             # we need the pow(norm-type).
             total_norm = grad_norm ** norm_type
 
+            # FastMoE
+            if len(grads_in_moe) > 0 : # 'cold' experts may not have any grads in one iteration
+                grad_norm, _ = multi_tensor_applier(
+                    amp_C.multi_tensor_l2norm,
+                    dummy_overflow_buf,
+                    [grads_in_moe],
+                    False # no per-parameter norm
+                )
+                grad_norm = grad_norm ** norm_type
+                torch.distributed.all_reduce(grad_norm, op=torch.distributed.ReduceOp.SUM, group=mpu.get_model_parallel_group())
+                total_norm += grad_norm
         else:
+            # FastMoE TODO
+            assert False, f"norm_type {norm_type} is not supported by FastMoE "
             for grad in grads_for_norm:
                 grad_norm = torch.norm(grad, norm_type)
                 total_norm += grad_norm ** norm_type
