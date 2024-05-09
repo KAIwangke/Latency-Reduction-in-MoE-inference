@@ -32,7 +32,6 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --load $CHECKPOINT_PATH \
        --data-path $DATA_PATH \
        --vocab-file vocab.json \
-       --hidden-hidden-size 256\
        --merge-file merges.txt \
        --data-impl mmap \
        --split 949,50,1 \
@@ -48,6 +47,5 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --save-interval 10000 \
        --eval-interval 1000 \
        --eval-iters 10 \
-       --num-experts 4\
        --fp16
 
