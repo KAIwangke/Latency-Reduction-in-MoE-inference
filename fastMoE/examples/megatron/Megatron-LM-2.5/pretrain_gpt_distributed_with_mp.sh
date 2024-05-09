@@ -50,5 +50,5 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --fp16 \
        --fmoefy \
        --num-experts 4\
-       --top-k 2
+       --top-k 2 
 

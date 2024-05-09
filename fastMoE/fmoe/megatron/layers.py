@@ -178,6 +178,7 @@ def fmoefy(
     from megatron import get_args
 
     args = get_args()
+    args.balance_strategy = "naive"
 
     # Set distributed_experts to None to use default setting in args
     if distributed_experts is not None:
