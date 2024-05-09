@@ -218,7 +218,8 @@ class FMoE(nn.Module):
         ), "MoE inputs must have the same batch size"
 
         if self.world_size > 1:
-
+            print("*"*100)
+            print("expert parallel")    
             def ensure_comm_func(tensor):
                 ensure_comm(tensor, self.moe_group)
 
