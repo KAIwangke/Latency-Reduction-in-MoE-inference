@@ -224,6 +224,8 @@ class FMoE(nn.Module):
                 ensure_comm(tensor, self.moe_group)
 
             tree.map_structure(ensure_comm_func, moe_inp)
+
+
         if self.slice_size > 1:
 
             def slice_func(tensor):
@@ -239,6 +241,12 @@ class FMoE(nn.Module):
         '''
         # print("forward func layer idx : ",layer_idx)
         gate_top_k_idx, gate_score = self.gate(moe_inp, layer_idx=layer_idx)
+
+
+        # TODO
+        # the k-v hashmap store each layer with idx most selected expert
+
+
         
         if self.gate_hook is not None:
             self.gate_hook(gate_top_k_idx, gate_score, None)

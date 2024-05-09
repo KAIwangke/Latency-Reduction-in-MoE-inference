@@ -171,6 +171,9 @@ void fmoe_cuda_fused_forward_impl(
     if (params.size() > 0) {
         evt_shadow = new cudaEvent_t[params.size()];
     }
+
+    // the shadowing expert to replicate the expert
+    
     for (long i = 0, si = 0; i < world_size * num_expert; ++i) {
         if (stored_models[i]) {
             if (i / num_expert == rank) {
