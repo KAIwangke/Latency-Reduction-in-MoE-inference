@@ -22,7 +22,8 @@ if [[ $1 == 'train' ]]; then
         --eval_tgt_len 128 \
         --batch_size 16 \
         --gpu0_bsz 4 \
-        --moe --moe-num-expert 8 --moe-top-k 2 \ --multi_gpu \
+        --multi_gpu \ 
+        --moe --moe-num-expert 8 --moe-top-k 2 
         ${@:2}
 elif [[ $1 == 'eval' ]]; then
     echo 'Run evaluation...'
