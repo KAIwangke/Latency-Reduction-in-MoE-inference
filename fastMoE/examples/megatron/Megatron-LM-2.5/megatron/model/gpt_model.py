@@ -65,7 +65,6 @@ class GPTModel(MegatronModule):
                  parallel_output=True,
                  pre_process=True,
                  post_process=True):
-        
         super(GPTModel, self).__init__()
         args = get_args()
 

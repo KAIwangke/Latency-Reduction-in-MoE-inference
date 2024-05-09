@@ -35,23 +35,14 @@ from megatron import update_num_microbatches
 from megatron import mpu
 from megatron import print_rank_0
 from megatron import print_rank_last
-
-# FastMoE
-# from megatron.checkpointing import load_checkpoint
-from fmoe.megatron.checkpoint import load_checkpoint
-# from megatron.checkpointing import save_checkpoint
-from fmoe.megatron.checkpoint import save_checkpoint
-
+from megatron.checkpointing import load_checkpoint
+from megatron.checkpointing import save_checkpoint
 from megatron.model import Float16Module
 from megatron.optimizer import get_megatron_optimizer
 from megatron.initialize import initialize_megatron
 from megatron.initialize import write_args_to_tensorboard
 from megatron.learning_rates import AnnealingLR
-
-# FastMoE
-# from megatron.model import DistributedDataParallel as LocalDDP
-from fmoe.megatron import DistributedDataParallel as LocalDDP
-
+from megatron.model import DistributedDataParallel as LocalDDP
 from megatron.utils import check_adlr_autoresume_termination
 from megatron.utils import unwrap_model
 from megatron.data.data_samplers import build_pretraining_data_loader
@@ -115,16 +106,6 @@ def pretrain(train_valid_test_dataset_provider,
 
     args = get_args()
     timers = get_timers()
-
-    print("!"*100)
-    print(args.fmoefy)
-    
-    # Initialize FastMoE
-    if args.fmoefy:
-        from fmoe.megatron import patch_forward_step, patch_model_provider
-
-        forward_step_func = patch_forward_step(forward_step_func, Megatron_Version="v2.5")
-        model_provider = patch_model_provider(model_provider, Megatron_Version='v2.5')
 
     # Model, optimizer, and learning rate.
     timers('model-and-optimizer-setup').start()
@@ -405,12 +386,10 @@ def train_step(forward_step_func, data_iterator,
 
         if unwrapped_model.share_word_embeddings:
             word_embeddings_weight = unwrapped_model.word_embeddings_weight()
-            grad = word_embeddings_weight.grad
-            # FastMoE does not have main_grad field
-            # if args.DDP_impl == 'local':
-            #     grad = word_embeddings_weight.main_grad
-            # else:
-            #     grad = word_embeddings_weight.grad
+            if args.DDP_impl == 'local':
+                grad = word_embeddings_weight.main_grad
+            else:
+                grad = word_embeddings_weight.grad
             torch.distributed.all_reduce(grad, group=mpu.get_embedding_group())
     timers('backward-embedding-all-reduce').stop()
 
@@ -479,13 +458,26 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
     # Logging.
     timers_to_log = []
 
-    # FastMoE add several timers.
-    # For simplicity, add all timers to log.
-    def add_all():
-        for name in timers.timers:
+    def add_to_logging(name):
+        if name in timers.timers:
             timers_to_log.append(name)
-
-    add_all()
+    add_to_logging('forward-compute')
+    add_to_logging('forward-recv')
+    add_to_logging('forward-send')
+    add_to_logging('forward-backward-send-forward-backward-recv')
+    add_to_logging('backward-compute')
+    add_to_logging('backward-recv')
+    add_to_logging('backward-send')
+    add_to_logging('backward-send-forward-recv')
+    add_to_logging('backward-send-backward-recv')
+    add_to_logging('backward-params-all-reduce')
+    add_to_logging('backward-embedding-all-reduce')
+    add_to_logging('optimizer-copy-to-main-grad')
+    add_to_logging('optimizer-unscale-and-check-inf')
+    add_to_logging('optimizer-clip-main-grad')
+    add_to_logging('optimizer-copy-main-to-model-params')
+    add_to_logging('optimizer')
+    add_to_logging('batch-generator')
 
     # Calculate batch size.
     batch_size = args.micro_batch_size * args.data_parallel_size * \
@@ -802,7 +794,7 @@ def build_train_valid_test_data_iterators(
 
     # Data loader only on rank 0 of each model parallel group.
     if mpu.get_tensor_model_parallel_rank() == 0:
-        args.train_samples=100
+
         # Number of train/valid/test samples.
         if args.train_samples:
             train_samples = args.train_samples
