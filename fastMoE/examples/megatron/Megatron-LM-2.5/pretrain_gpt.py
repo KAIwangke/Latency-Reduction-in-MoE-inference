@@ -30,6 +30,16 @@ from megatron.utils import average_losses_across_data_parallel_group
 
 from fmoe.megatron.layers import fmoefy
 
+
+# def fmoefy(
+#     model,
+#     fmoe_num_experts=None,
+#     distributed_experts=True,
+#     hidden_hidden_size=None,
+#     top_k=None,
+#     gate=None,
+#     megatron_version=None
+# )
 def model_provider(pre_process=True, post_process=True):
     """Build the model."""
 
@@ -40,7 +50,7 @@ def model_provider(pre_process=True, post_process=True):
         pre_process=pre_process,
         post_process=post_process
     )
-    model = fmoefy(model, 4, hidden_hidden_size=64, Megatron_Version="v2.5")
+    model = fmoefy(model, fmoe_num_experts = 4, hidden_hidden_size=64,top_k = 1,megatron_version="v2.5")
 
     return model
 
