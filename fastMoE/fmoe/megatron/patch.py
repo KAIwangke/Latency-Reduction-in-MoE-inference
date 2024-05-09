@@ -70,6 +70,8 @@ def patch_forward_step(forward_step_func, Megatron_Version="v2.5"):
 
     def forward_step_with_balance_loss_v2_5(data_iterator, model):
         from functools import partial
+
+        print("now is v2.5")
         output, loss_func = forward_step_func(data_iterator, model)
     
         while hasattr(model, 'module'):
