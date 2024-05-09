@@ -68,9 +68,6 @@ def patch_forward_step(forward_step_func, Megatron_Version="v2.5"):
 
     from megatron import get_args
 
-    if not get_args().balance_strategy:
-        return forward_step_func
-
     def forward_step_with_balance_loss_v2_5(data_iterator, model):
         from functools import partial
         output, loss_func = forward_step_func(data_iterator, model)
