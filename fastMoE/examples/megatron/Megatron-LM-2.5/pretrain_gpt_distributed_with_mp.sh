@@ -48,5 +48,7 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --eval-interval 1000 \
        --eval-iters 10 \
        --fp16 \
-       --fmoefy
+       --fmoefy \
+       --fmoe-num-experts 4\
+       --hidden-hidden-size 64
 
