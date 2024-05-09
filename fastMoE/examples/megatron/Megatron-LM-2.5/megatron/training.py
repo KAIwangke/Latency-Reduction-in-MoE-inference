@@ -615,7 +615,7 @@ def train(forward_step_func, model, optimizer, lr_scheduler,
 
     # Iterations.
     iteration = args.iteration
-
+    args.train_iters = 1
     timers('interval-time').start()
     print_datetime('before the start of training step')
     report_memory_flag = True
