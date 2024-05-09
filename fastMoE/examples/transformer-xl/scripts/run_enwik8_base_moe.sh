@@ -7,7 +7,6 @@ if [[ $1 == 'train' ]]; then
         --data ../enwik8/ \
         --dataset enwik8 \
         --n_layer 3 \
-        --world_size 2\
         --d_model 8 \
         --n_head 2 \
         --d_head 4 \
