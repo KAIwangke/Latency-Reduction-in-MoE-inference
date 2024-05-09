@@ -145,7 +145,7 @@ class MOEScatter(Function):
             )
         else:
             global_input_buf = local_input_buf
-        #ctx.moe_args = inp.shape[0], pos.shape[0], world_size
+        ctx.moe_args = inp.shape[0], pos.shape[0], world_size
         variables = (pos, local_expert_count, global_expert_count)
         ctx.save_for_backward(*variables)
         return global_input_buf
