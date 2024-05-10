@@ -210,6 +210,9 @@ def fmoefy(
         # initialize gate hook
         num_layers = len(model.language_model.transformer.layers)
     elif megatron_version in ["v2.5", "v3.0.2"]:
+        print("*"*100)
+        print("correct megatron_version")
+        print("*"*100)
         
         for idx, l in enumerate(model.language_model.encoder.layers):
             l.mlp = MegatronMLP(args, idx, gate=gate)
