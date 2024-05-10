@@ -2,7 +2,7 @@
 #include "utils/fmoe_utils.h"
 #include <torch/extension.h>
 
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 #include <nccl.h>
 
 
@@ -157,4 +157,4 @@ void _ensure_nccl(c10d::ProcessGroupNCCL& p, torch::Tensor t) {
     }
 }
 
-#endif  // FMOE_USE_NCCL
+// #endif  // FMOE_USE_NCCL

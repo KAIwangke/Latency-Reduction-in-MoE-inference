@@ -3,7 +3,7 @@
 
 #include "utils/helper_cuda.h"
 
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 #include <nccl.h>
 
 #define NCCL_SAFE_CALL(__fn__) { \
@@ -14,7 +14,7 @@
     } \
 }
 
-#endif
+// #endif
 
 class CudaStreamManager {
 public:
@@ -22,10 +22,10 @@ public:
     cublasHandle_t* handles;
     cudaStream_t* streams;
     bool use_default;
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
     char ncclgood;
     ncclComm_t ncclcomm;
-#endif
+// #endif
 
 public:
     CudaStreamManager(int device_): device(device_), use_default(false) {

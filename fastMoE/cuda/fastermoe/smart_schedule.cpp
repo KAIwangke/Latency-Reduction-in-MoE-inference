@@ -1,4 +1,4 @@
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 
 #include <cstdlib>
 #include <vector>
@@ -180,5 +180,5 @@ torch::Tensor _smart_sch_backward(
     }));
     return grad_in;
 }
-#endif
+// #endif
 

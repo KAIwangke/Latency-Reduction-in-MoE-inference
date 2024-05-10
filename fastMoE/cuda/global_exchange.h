@@ -1,5 +1,5 @@
 #include "stream_manager.h"
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 #include <iostream>
 using namespace std;
 
@@ -107,4 +107,4 @@ void fmoe_cuda_global_gather_impl(
 }
 
 
-#endif  // FMOE_USE_NCCL
+// #endif  // FMOE_USE_NCCL

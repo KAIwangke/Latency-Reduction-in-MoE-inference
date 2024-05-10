@@ -4,7 +4,7 @@
 #include <torch/extension.h>
 
 // global_exchange
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 
 #if defined(TORCH_VERSION_MAJOR) && (TORCH_VERSION_MAJOR > 1 || \
         (TORCH_VERSION_MAJOR == 1 && TORCH_VERSION_MINOR >= 13))
@@ -33,7 +33,7 @@ void _ensure_nccl(c10d::ProcessGroup& p, torch::Tensor t);
 void _ensure_nccl(c10d::ProcessGroupNCCL& p, torch::Tensor t);
 #endif  // TORCH_VERSION
 
-#endif  // FMOE_USE_NCCL
+// #endif  // FMOE_USE_NCCL
 
 // local_exchange
 void _assign_pos(
@@ -102,7 +102,7 @@ void _reduce_grad(
         long expert_size);
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
     m.def("expert_exchange", &_expert_exchange, "FastMoE expert exchange (CUDA)");
     m.def("global_scatter", &_global_scatter, "FastMoE global scatter (CUDA)");
     m.def("global_gather", &_global_gather, "FastMoE global gather (CUDA)");
@@ -112,7 +112,7 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     m.def("smart_sch_forward", &_smart_sch_forward, "E2E MoE layer forward with smart scheduling");
     m.def("smart_sch_backward", &_smart_sch_backward, "E2E MoE layer backward with smart scheduling");
     m.def("reduce_grad", &_reduce_grad, "Reduce gradients over FastMoE's communication stream");
-#endif
+// #endif
 
     m.def("expert_count", &_expert_count, "FastMoE count gate indices (CUDA)");
     m.def("assign_pos", &_assign_pos, "FastMoE assign pos by gate (CUDA)");

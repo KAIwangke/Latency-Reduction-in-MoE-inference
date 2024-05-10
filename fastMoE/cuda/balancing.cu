@@ -77,7 +77,7 @@ T* _d2h(const T* dptr, size_t sz) {
     return _d2h(dptr, hptr, sz);
 }
 
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 
 #include <nccl.h>
 
@@ -198,4 +198,4 @@ std::vector<torch::Tensor> _swipe_once(
 
 #undef UPDATE_COUNTERS
 
-#endif
+// #endif
