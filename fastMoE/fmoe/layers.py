@@ -253,7 +253,7 @@ class FMoE(nn.Module):
             mask = self.mask.view(-1)
             moe_inp = tree.map_structure(delete_mask_func, moe_inp)
             gate_top_k_idx = gate_top_k_idx[mask == 0, :]
-
+        print("_fmoe_general_global_forward")
         fwd = _fmoe_general_global_forward(
             moe_inp, gate_top_k_idx, self.expert_fn_single if fmoe_faster_schedule else self.expert_fn,
             self.num_expert, self.world_size,
