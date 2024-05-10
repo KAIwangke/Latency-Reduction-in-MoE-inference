@@ -109,7 +109,6 @@ class MOEScatter(Function):
         fwd_batch_size,
         world_size,
     ):
-        print(world_size)
         local_input_buf = _local_scatter(inp, pos)
         if world_size > 1:
             
@@ -121,7 +120,7 @@ class MOEScatter(Function):
                 world_size,
             )
         else:
-            print("getting into the global scatter")
+            print("!"*10000)
             global_input_buf = local_input_buf
         ctx.moe_args = inp.shape[0], pos.shape[0], world_size
         variables = (pos, local_expert_count, global_expert_count)
