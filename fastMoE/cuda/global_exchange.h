@@ -55,7 +55,6 @@ The line int idx = i + j * n_expert; calculates the index of the current expert.
             }
             if (global_expert_count[idx]) {
                 /*only print the device 0*/
-
                 if(j==0){
                     printf("this is the check for which expert: %d on device: %zu\n", idx, j);
                 }
