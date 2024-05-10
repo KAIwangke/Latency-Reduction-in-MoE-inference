@@ -33,7 +33,7 @@ torch::Tensor _limit_by_capacity(
 }
 
 torch::Tensor _prune_gate_by_capacity(
-        torch::Tensor gate_idx, torch::Tensor expert_count,
+        torch::Tensor gate_idx, torch::Tensor expert_count, 
         long n_expert, long n_worker) {
     auto smgr = getCudaStreamManager(expert_count.device().index());
     auto batch_size = gate_idx.numel();

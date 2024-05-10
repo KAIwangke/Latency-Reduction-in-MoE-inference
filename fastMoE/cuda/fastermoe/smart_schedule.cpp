@@ -86,6 +86,9 @@ std::vector<torch::Tensor> _smart_sch_forward(
         }
         setSmartSchEnabled(1);
     }
+    printf("************************************************************")
+    printf("now starting with the smart schedule forwarding");
+    printf("************************************************************")
 
     auto smgr = getCudaStreamManager(input_buf.device().index());
     int rank;
@@ -167,7 +170,7 @@ torch::Tensor _smart_sch_backward(
             set_grad_fn,
             grad_out.device(),
             grad_out.data_ptr<scalar_t>(),
-            
+
             global_grad_out.data_ptr<scalar_t>(),
             global_grad_in.data_ptr<scalar_t>(),
             grad_in.data_ptr<scalar_t>(),
