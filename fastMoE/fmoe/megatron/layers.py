@@ -80,6 +80,8 @@ class MegatronMLP(FMoETransformerMLP):
         #     moe_group = None
         # else:
         world_size = args.data_parallel_size
+        print("check the world size")        
+        print(world_size)
         from megatron.mpu import get_data_parallel_group
         moe_group = get_data_parallel_group()
         

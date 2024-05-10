@@ -61,9 +61,7 @@ def parse_args(extra_args_provider=None, defaults={},
     # Distributed args.
     args.rank = int(os.getenv('RANK', '0'))
     args.world_size = int(os.getenv("WORLD_SIZE", '1'))
-
-    print("check the world size")
-    print(args.world_size)
+    print("worldsize",args.world_size)
     # Tensor model parallel size.
     args.tensor_model_parallel_size = min(
         args.tensor_model_parallel_size, args.world_size)
@@ -81,6 +79,9 @@ def parse_args(extra_args_provider=None, defaults={},
         ' divisible by tensor parallel size ({}) times pipeline parallel ' \
         'size ({})'.format(args.world_size, args.tensor_model_parallel_size,
                            args.pipeline_model_parallel_size)
+    print("worldsize",args.world_size)
+
+    
     args.data_parallel_size = args.world_size // model_parallel_size
     if args.rank == 0:
         print('using world size: {}, data-parallel-size: {}, '
