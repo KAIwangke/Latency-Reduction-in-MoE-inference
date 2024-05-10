@@ -114,7 +114,7 @@ class FMoE(nn.Module):
         self,
         num_expert=32,
         d_model=1024,
-        world_size=4,
+        world_size=2,
         mp_group=None,  # being deprecated
         slice_group=None,
         moe_group=None,
