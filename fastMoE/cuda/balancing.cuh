@@ -44,8 +44,8 @@ void prune_gate_by_capacity_kernel(const long* gate_idx, long* new_gate_idx,
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < batch_size) {
         int orig_cap = atomicSub(ec + gate_idx[i], 1);
-        
-        print("this is the capacity of original gate idx: %d",orig_cap);
+
+        printf("this is the capacity of original gate idx: %d",orig_cap);
 
         if (orig_cap <= 0) {
             new_gate_idx[i] = -1;
