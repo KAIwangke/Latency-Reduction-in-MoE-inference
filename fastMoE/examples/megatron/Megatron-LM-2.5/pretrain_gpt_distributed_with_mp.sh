@@ -21,7 +21,7 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
     pretrain_gpt.py \
     --tensor-model-parallel-size 2 \
     --pipeline-model-parallel-size 2 \
-    --num-layers 3 \
+    --num-layers 4 \
     --hidden-size 8 \
     --num-attention-heads 4 \
     --micro-batch-size 4 \
