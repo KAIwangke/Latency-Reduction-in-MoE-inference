@@ -737,7 +737,7 @@ def evaluate(forward_step_func, data_iterator, model, verbose=False):
         model_module.train()
 
     for key in total_loss_dict:
-        total_loss_dict[key] /= args.eval_iters * get_num_microbatches()
+        total_loss_dict[key] /= args.eval_iters * get_num_microbatches()    
 
     return total_loss_dict
 

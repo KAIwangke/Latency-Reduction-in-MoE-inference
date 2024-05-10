@@ -39,10 +39,10 @@ void fmoe_cuda_global_scatter_impl(
     for (size_t i = 0; i < n_expert; ++i) {
         NCCL_SAFE_CALL(ncclGroupStart());
         for (size_t j = 0; j < world_size; ++j) {
-/*
-The current expert being processed is determined by the loop variables i and j.
-The line int idx = i + j * n_expert; calculates the index of the current expert.
-*/            
+            /*
+            The current expert being processed is determined by the loop variables i and j.
+            The line int idx = i + j * n_expert; calculates the index of the current expert.
+            */            
             int idx = i + j * n_expert;
             if (local_expert_count[idx]) {
                 NCCL_SAFE_CALL(ncclSend(

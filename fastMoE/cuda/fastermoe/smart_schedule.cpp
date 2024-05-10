@@ -166,8 +166,8 @@ torch::Tensor _smart_sch_backward(
             collect_fn,
             set_grad_fn,
             grad_out.device(),
-
             grad_out.data_ptr<scalar_t>(),
+            
             global_grad_out.data_ptr<scalar_t>(),
             global_grad_in.data_ptr<scalar_t>(),
             grad_in.data_ptr<scalar_t>(),
