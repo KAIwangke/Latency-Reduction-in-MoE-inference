@@ -61,6 +61,9 @@ def parse_args(extra_args_provider=None, defaults={},
     # Distributed args.
     args.rank = int(os.getenv('RANK', '0'))
     args.world_size = int(os.getenv("WORLD_SIZE", '1'))
+
+    print("check the world size")
+    print(args.world_size)
     # Tensor model parallel size.
     args.tensor_model_parallel_size = min(
         args.tensor_model_parallel_size, args.world_size)
