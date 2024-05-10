@@ -23,7 +23,7 @@ from fmoe.megatron.layers import fmoefy
 def initialize_distributed(tensor_model_parallel_size = 1, pipeline_model_parallel_size = 1):
     # Torch setup for distributed training
     rank = int(os.environ['LOCAL_RANK'])
-    world_size = torch.cuda.device_count()
+    world_size = 4
     torch.distributed.init_process_group(world_size=world_size, rank=rank)
 
     # Megatron core distributed training initialization

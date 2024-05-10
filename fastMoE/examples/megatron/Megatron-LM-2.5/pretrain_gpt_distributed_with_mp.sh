@@ -3,7 +3,7 @@
 # Runs the "345M" parameter model
 
 echo "Running the pretrain_gpt.py script now..."
-GPUS_PER_NODE=2
+GPUS_PER_NODE=4  # Change this to 4
 # Change for multinode config
 MASTER_ADDR=localhost
 MASTER_PORT=6000
@@ -16,7 +16,8 @@ CHECKPOINT_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/
 
 DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT"
 
-python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
+# Add CUDA_VISIBLE_DEVICES environment variable
+CUDA_VISIBLE_DEVICES=0,0,1,1 python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        pretrain_gpt.py \
        --tensor-model-parallel-size 2 \
        --pipeline-model-parallel-size 2 \
