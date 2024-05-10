@@ -54,7 +54,11 @@ The line int idx = i + j * n_expert; calculates the index of the current expert.
                         smgr->torchStream()));
             }
             if (global_expert_count[idx]) {
-                printf("this is the check for which expert: %d on device: %zu\n", idx, j);
+                '''only print the expert on device 0'''
+                
+                if(j==0){
+                    printf("this is the check for which expert: %d on device: %zu\n", idx, j);
+                }
                 NCCL_SAFE_CALL(ncclRecv(
                         input_buf + recv_ptr * in_feat,
                         global_expert_count[idx] * in_feat * sizeof(scalar_t),
