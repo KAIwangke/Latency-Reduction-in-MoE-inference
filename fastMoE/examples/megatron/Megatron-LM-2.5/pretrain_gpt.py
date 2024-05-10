@@ -14,6 +14,10 @@
 # limitations under the License.
 
 """Pretrain GPT"""
+import sys
+
+sys.path.append('/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/megatron') 
+
 
 import torch
 from functools import partial
