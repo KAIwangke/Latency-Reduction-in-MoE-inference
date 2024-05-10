@@ -78,9 +78,9 @@ class MoEForward(Function):
         ctx.save_for_backward(*variables)
 
 
-        # if stored_models.any():
-        #     shadowed_experts = torch.nonzero(stored_models).flatten().tolist()
-        #     print(f"Shadowed experts: {shadowed_experts}")
+        if stored_models.any():
+            shadowed_experts = torch.nonzero(stored_models).flatten().tolist()
+            print(f"Shadowed experts: {shadowed_experts}")
         
         return out
 
