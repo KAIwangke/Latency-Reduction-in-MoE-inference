@@ -18,8 +18,8 @@ DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $
 
 python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        pretrain_gpt.py \
-       --tensor-model-parallel-size 2 \
-       --pipeline-model-parallel-size 2 \
+       --tensor-model-parallel-size 1 \
+       --pipeline-model-parallel-size 1 \
        --num-layers 3 \
        --hidden-size 8 \
        --num-attention-heads 4 \
