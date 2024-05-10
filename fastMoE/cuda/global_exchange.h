@@ -12,6 +12,14 @@ void fmoe_cuda_expert_exchange_impl(
 
 
 template<typename scalar_t>
+
+/*
+fmoe_cuda_global_scatter_impl: 
+This function scatters input data to different experts across multiple GPUs or nodes. 
+It first calculates the offset for each expert's data in the input buffer (expert_ptr). 
+Then, for each expert, it sends the corresponding data to the GPU/node 
+where the expert is located (ncclSend) and receives data from other GPUs/nodes (ncclRecv).
+*/
 void fmoe_cuda_global_scatter_impl(
     const scalar_t* local_input_buf,
     const long* local_expert_count,
@@ -34,8 +42,13 @@ void fmoe_cuda_global_scatter_impl(
     for (size_t i = 0; i < n_expert; ++i) {
         NCCL_SAFE_CALL(ncclGroupStart());
         for (size_t j = 0; j < world_size; ++j) {
+/*
+The current expert being processed is determined by the loop variables i and j.
+The line int idx = i + j * n_expert; calculates the index of the current expert.
+*/            
             int idx = i + j * n_expert;
             printf("this is the check for which expert %d",idx);
+            fflush(stdout);
             if (local_expert_count[idx]) {
                 NCCL_SAFE_CALL(ncclSend(
                         local_input_buf + expert_ptr[idx] * in_feat,

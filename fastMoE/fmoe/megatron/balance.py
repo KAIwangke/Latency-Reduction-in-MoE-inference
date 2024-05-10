@@ -22,10 +22,7 @@ def reset_gate_hook(_num_layers=None):
 
 def get_balance_profile():
     global balance_dict
-    print("*"*100)
     print("balance_dict",balance_dict)
-    print("*"*100)
-    
     return balance_dict
 
 
@@ -36,7 +33,6 @@ def generate_megatron_gate_hook(layer_idx, num_expert_global):
 
     def megatron_gate_hook(gate_top_k_idx, gate_score_top_k, gate_context):
         global balance_dict
-        print("gate_score_top_k",gate_score_top_k)
         update_balance_profile(
             balance_dict,
             gate_top_k_idx,

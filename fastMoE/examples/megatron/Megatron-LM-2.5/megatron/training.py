@@ -119,9 +119,6 @@ def pretrain(train_valid_test_dataset_provider,
     # Initialize FastMoE
     if args.fmoefy:
         from fmoe.megatron import patch_forward_step, patch_model_provider
-        print("*"*100)
-        print("forward_step_func")
-        print("*"*100)
 
         forward_step_func = patch_forward_step(forward_step_func, Megatron_Version="v2.5")
         model_provider = patch_model_provider(model_provider, Megatron_Version='v2.5')
