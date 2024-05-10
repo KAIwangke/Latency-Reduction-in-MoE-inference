@@ -44,7 +44,6 @@ The current expert being processed is determined by the loop variables i and j.
 The line int idx = i + j * n_expert; calculates the index of the current expert.
 */            
             int idx = i + j * n_expert;
-            printf("this is the check for which expert %d\n",idx);
             if (local_expert_count[idx]) {
                 NCCL_SAFE_CALL(ncclSend(
                         local_input_buf + expert_ptr[idx] * in_feat,
@@ -55,6 +54,7 @@ The line int idx = i + j * n_expert; calculates the index of the current expert.
                         smgr->torchStream()));
             }
             if (global_expert_count[idx]) {
+                printf("this is the check for which expert %d\n",idx);
                 NCCL_SAFE_CALL(ncclRecv(
                         input_buf + recv_ptr * in_feat,
                         global_expert_count[idx] * in_feat * sizeof(scalar_t),
