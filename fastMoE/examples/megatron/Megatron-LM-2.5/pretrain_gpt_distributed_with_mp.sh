@@ -10,7 +10,7 @@ NNODES=2
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
 # Set default value for MASTER_PORT if not already set
-MASTER_PORT=${MASTER_PORT:-12345}
+MASTER_PORT=${MASTER_PORT:-120899}
 
 DATA_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/openwebtext_subset_text_document
 CHECKPOINT_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/experiment
