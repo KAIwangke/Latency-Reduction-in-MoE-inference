@@ -54,7 +54,7 @@ The line int idx = i + j * n_expert; calculates the index of the current expert.
                         smgr->torchStream()));
             }
             if (global_expert_count[idx]) {
-                printf("this is the check for which expert %d\n",idx);
+                printf("this is the check for which expert: %d\n",idx);
                 NCCL_SAFE_CALL(ncclRecv(
                         input_buf + recv_ptr * in_feat,
                         global_expert_count[idx] * in_feat * sizeof(scalar_t),
