@@ -81,8 +81,9 @@ def parse_args(extra_args_provider=None, defaults={},
                            args.pipeline_model_parallel_size)
     print("worldsize",args.world_size)
 
-    
+
     args.data_parallel_size = args.world_size // model_parallel_size
+    print("data_parallel_size",args.data_parallel_size)
     if args.rank == 0:
         print('using world size: {}, data-parallel-size: {}, '
               'tensor-model-parallel size: {}, '
