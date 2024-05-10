@@ -78,10 +78,10 @@ def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, *
     return outp
 
 
-fmoe_faster_schedule = False
-if switch_from_env('FMOE_FASTER_SCHEDULE_ENABLE', False):
-    fmoe_faster_schedule = True
-    from .fastermoe.schedule import _fmoe_general_global_forward
+# fmoe_faster_schedule = False
+# if switch_from_env('FMOE_FASTER_SCHEDULE_ENABLE', False):
+fmoe_faster_schedule = True
+from .fastermoe.schedule import _fmoe_general_global_forward
 import time
 
 

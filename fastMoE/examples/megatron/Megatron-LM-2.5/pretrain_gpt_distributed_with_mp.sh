@@ -18,7 +18,6 @@ DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $
 
 python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        pretrain_gpt.py \
-       --FMOE_FASTER_SCHEDULE_ENABLE 1\
        --tensor-model-parallel-size 1 \
        --pipeline-model-parallel-size 1 \
        --num-layers 3 \
