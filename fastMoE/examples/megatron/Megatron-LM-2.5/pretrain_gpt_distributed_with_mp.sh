@@ -5,7 +5,7 @@
 GPUS_PER_NODE=2
 
 # Change for multinode config
-MASTER_ADDR=localhost
+MASTER_ADDR=10.144.0.105
 NNODES=2
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
