@@ -15,7 +15,7 @@ MASTER_PORT=${MASTER_PORT:-120899}
 DATA_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/openwebtext_subset_text_document
 CHECKPOINT_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/experiment
 
-DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT"
+DISTRIBUTED_ARGS="$WORLD_SIZE --nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT"
 
 python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
     pretrain_gpt.py \
