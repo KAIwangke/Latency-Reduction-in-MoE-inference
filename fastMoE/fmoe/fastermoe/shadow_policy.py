@@ -8,6 +8,8 @@ from fmoe.functions import get_moe_group
 
 
 def global_policy(local_expert_count, _gec, num_expert, world_size):
+
+    print("the actual global policy for echecking which expert to shadow")
     r"""
     This is the policy for two-layer MLPs, using the formula in the PPoPP paper.
     A few parameters are used in this policy.
