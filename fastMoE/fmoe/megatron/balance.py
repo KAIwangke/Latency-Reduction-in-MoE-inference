@@ -22,6 +22,10 @@ def reset_gate_hook(_num_layers=None):
 
 def get_balance_profile():
     global balance_dict
+    print("*"*100)
+    print("balance_dict",balance_dict)
+    print("*"*100)
+    
     return balance_dict
 
 
