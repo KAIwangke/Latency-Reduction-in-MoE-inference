@@ -114,7 +114,7 @@ class FMoE(nn.Module):
         self,
         num_expert=32,
         d_model=1024,
-        world_size=2,
+        world_size=1,
         mp_group=None,  # being deprecated
         slice_group=None,
         moe_group=None,
@@ -130,7 +130,7 @@ class FMoE(nn.Module):
         super().__init__()
         self.num_expert = num_expert
         self.d_model = d_model
-        self.world_size = 2
+        self.world_size = world_size
 
         self.slice_group = slice_group
         if mp_group is not None:
