@@ -63,6 +63,7 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
 
 
 def no_shadow_policy(_lec, _gec, num_expert, world_size):
+    print("no shadow policy")
     res = torch.zeros(world_size * num_expert, dtype=bool)
     return res
 
