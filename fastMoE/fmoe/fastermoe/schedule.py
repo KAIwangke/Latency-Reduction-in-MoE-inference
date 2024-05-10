@@ -59,6 +59,7 @@ class MoEForward(Function):
         def stash_fn(params, store_idx, expert_idx):
             expert_utils.stash_expert_params(experts, params, expert_idx)
             ctx.shadows[store_idx] = params
+        print("smart schedule forward")    
         local_output_buf, gib = fmoe_native.smart_sch_forward(
                 local_input_buf,
                 local_expert_count, global_expert_count, 
