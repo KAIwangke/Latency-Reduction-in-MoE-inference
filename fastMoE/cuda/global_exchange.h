@@ -27,9 +27,6 @@ void fmoe_cuda_global_scatter_impl(
     scalar_t* input_buf,
     size_t in_feat, size_t n_expert, size_t world_size,
     CudaStreamManager* smgr) {
-    printf("getting into the function fmoe_cuda_expert_exchange_impl");
-
-    
     // assert world_size > 1
     int recv_ptr = 0;
     /* TODO: may save for backward */
@@ -47,8 +44,7 @@ The current expert being processed is determined by the loop variables i and j.
 The line int idx = i + j * n_expert; calculates the index of the current expert.
 */            
             int idx = i + j * n_expert;
-            printf("this is the check for which expert %d",idx);
-            fflush(stdout);
+            printf("this is the check for which expert %d\n",idx);
             if (local_expert_count[idx]) {
                 NCCL_SAFE_CALL(ncclSend(
                         local_input_buf + expert_ptr[idx] * in_feat,
