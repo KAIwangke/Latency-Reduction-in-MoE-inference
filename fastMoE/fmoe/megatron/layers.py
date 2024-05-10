@@ -204,6 +204,9 @@ def fmoefy(
 
     if megatron_version == "v2.2":
 
+        print("*"*100)
+        print("wrong megatron_version")
+        print("*"*100)
         for idx, l in enumerate(model.language_model.transformer.layers):
             l.mlp = MegatronMLP(args, idx, gate=gate)
 
