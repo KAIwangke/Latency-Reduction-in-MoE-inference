@@ -77,6 +77,11 @@ class MoEForward(Function):
         ctx.moe_args = fwd_batch_size, inp.shape[0], num_expert, world_size
         ctx.save_for_backward(*variables)
 
+
+        # if stored_models.any():
+        #     shadowed_experts = torch.nonzero(stored_models).flatten().tolist()
+        #     print(f"Shadowed experts: {shadowed_experts}")
+        
         return out
 
     @staticmethod

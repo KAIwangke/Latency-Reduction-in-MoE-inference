@@ -37,7 +37,7 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --vocab-file vocab.json \
        --merge-file merges.txt \
        --data-impl mmap \
-       --split 1,50,949 \
+       --split 50,1,949 \
        --distributed-backend nccl \
        --lr 0.00015 \
        --lr-decay-style cosine \
