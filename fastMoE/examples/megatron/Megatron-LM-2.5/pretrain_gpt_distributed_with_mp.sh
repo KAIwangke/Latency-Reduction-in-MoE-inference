@@ -7,7 +7,7 @@ GPUS_PER_NODE=2
 # Change for multinode config
 MASTER_ADDR=10.144.0.109
 NNODES=2
-WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
+WORLD_SIZE=4
 
 # Set default value for MASTER_PORT if not already set
 MASTER_PORT=${MASTER_PORT:-120899}
