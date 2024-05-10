@@ -1,9 +1,6 @@
 r"""
 A set of modules to plugin into Megatron-LM with FastMoE
 """
-print("!"*100)
-print("this version is the fastmoe build from local")
-print("!"*100)
 
 from .utils import add_fmoe_args
 
