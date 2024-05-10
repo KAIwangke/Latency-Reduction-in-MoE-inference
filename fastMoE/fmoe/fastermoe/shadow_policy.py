@@ -71,6 +71,6 @@ def no_shadow_policy(_lec, _gec, num_expert, world_size):
 def get_shadow_policy(d_model=None):
     if d_model is not None and 'FMOE_FASTER_GLBPLC_DMODEL' not in os.environ:
         os.environ['FMOE_FASTER_GLBPLC_DMODEL'] = str(d_model)
-    if not switch_from_env('FMOE_FASTER_SHADOW_ENABLE'):
-        return no_shadow_policy
+    # if not switch_from_env('FMOE_FASTER_SHADOW_ENABLE'):
+    #     return no_shadow_policy
     return global_policy
