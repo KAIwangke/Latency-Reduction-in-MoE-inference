@@ -130,7 +130,7 @@ class FMoE(nn.Module):
         super().__init__()
         self.num_expert = num_expert
         self.d_model = d_model
-        self.world_size = 4
+        self.world_size = 2
 
         self.slice_group = slice_group
         if mp_group is not None:
