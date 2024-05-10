@@ -12,7 +12,7 @@ using namespace std;
 
 long pipeline_gran = -1;
 
-int smart_sch_enabled = 0;
+int smart_sch_enabled = 1;
 
 int isSmartSchEnabled() {
     return smart_sch_enabled;

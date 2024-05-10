@@ -8,7 +8,7 @@ MASTER_ADDR=localhost
 MASTER_PORT=6000
 NNODES=1
 NODE_RANK=0
-WORLD_SIZE=4
+WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
 DATA_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/openwebtext_subset_text_document
 CHECKPOINT_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/experiment
@@ -17,7 +17,6 @@ DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $
 
 python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        pretrain_gpt.py \
-       --WORLD_SIZE 4\
        --tensor-model-parallel-size 2 \
        --pipeline-model-parallel-size 2 \
        --num-layers 3 \
