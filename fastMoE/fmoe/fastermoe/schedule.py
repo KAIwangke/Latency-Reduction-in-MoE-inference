@@ -127,7 +127,7 @@ def _fmoe_general_global_forward(inp, gate, expert_fn, n_expert, world_size, exp
         fwd_expert_count,
         fwd_batch_size,
     ) = prepare_forward(gate, n_expert, world_size)
-
+    print("version of _fmoe_general_global_forward enabled the shadow policy")
     global policy_fn
     if policy_fn is None:
         policy_fn = get_shadow_policy(d_model=inp.shape[-1])
