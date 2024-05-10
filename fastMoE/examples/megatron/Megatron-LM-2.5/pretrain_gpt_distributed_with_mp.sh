@@ -3,6 +3,8 @@
 # Runs the "345M" parameter model
 
 echo "Running the pretrain_gpt.py script now..."
+FMOE_FASTER_SHADOW_ENABLE
+
 GPUS_PER_NODE=2
 # Change for multinode config
 MASTER_ADDR=localhost
