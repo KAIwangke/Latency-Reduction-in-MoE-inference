@@ -118,9 +118,6 @@ class MegatronMLP(FMoETransformerMLP):
         )
         self.hidden_size = args.hidden_size
         if args.distributed_experts:
-            print("*"*100)
-            print("now is the distributed expert")
-            print("*"*100)
             
             self.rank = args.rank
         else:

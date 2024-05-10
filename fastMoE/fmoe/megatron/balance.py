@@ -31,13 +31,12 @@ def get_balance_profile():
 
 def generate_megatron_gate_hook(layer_idx, num_expert_global):
     from megatron import get_args
-    print("layer idx: ",layer_idx)
-    get_balance_profile()
 
     balance_strategy = get_args().balance_strategy
 
     def megatron_gate_hook(gate_top_k_idx, gate_score_top_k, gate_context):
         global balance_dict
+        print("gate_score_top_k",gate_score_top_k)
         update_balance_profile(
             balance_dict,
             gate_top_k_idx,
