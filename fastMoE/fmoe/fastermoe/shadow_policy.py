@@ -45,6 +45,10 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
     lat_base = 3 * comp_time * B_w + 4 * send_feature_time * B_w
 
     res = torch.zeros(world_size * num_expert, dtype=torch.bool)
+    print("lets check res")
+    print(res)
+
+
     shadow_time = 0
 
     for i, index in enumerate(indices):
