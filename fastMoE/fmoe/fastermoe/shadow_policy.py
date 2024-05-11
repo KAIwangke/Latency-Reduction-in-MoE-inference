@@ -36,7 +36,7 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
     print(fwd_expert_counts.flatten())
     
     B_ws, indices = fwd_expert_counts.flatten().sort(0, descending=True)
-    print(indices)
+    print("this is the indices",indices)
 
     alphaH2 = alpha * (d_model ** 2)
     B_w = B_ws[0]
