@@ -151,7 +151,8 @@ class MegatronMLP(FMoETransformerMLP):
 
     def forward(self, inp):
         from megatron import mpu
-        x = super().forward(inp)
+        # x = super().forward(inp)
+        x = super().forward(inp, layer_idx=self.layer_idx)
         x = mpu.reduce_from_tensor_model_parallel_region(x)
         return (
             x,
