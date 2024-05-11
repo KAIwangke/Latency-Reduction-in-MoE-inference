@@ -33,6 +33,7 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
     data_size = 4 
 
     fwd_expert_counts = all_global_expert_count.sum(1).cpu()
+    
     B_ws, indices = fwd_expert_counts.flatten().sort(0, descending=True)
 
     alphaH2 = alpha * (d_model ** 2)
