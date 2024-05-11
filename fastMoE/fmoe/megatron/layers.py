@@ -125,6 +125,7 @@ class MegatronMLP(FMoETransformerMLP):
             self.rank = 0
         self.sigma = args.init_method_std
         self.num_layers = args.num_layers
+        self.layer_idx = layer_idx 
         self.reset_parameters()
 
     def reset_parameters(self):
