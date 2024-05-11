@@ -218,6 +218,7 @@ class RelPartialLearnableMultiHeadAttn(RelMultiHeadAttn):
         self.r_net = nn.Linear(self.d_model, self.n_head * self.d_head, bias=False)
 
     def forward(self, w, r, r_w_bias, r_r_bias, attn_mask=None, mems=None, layer_idx=None):
+        print(f"Inside RelPartialLearnableMultiHeadAttn, layer_idx: {layer_idx}") 
         qlen, rlen, bsz = w.size(0), r.size(0), w.size(1)
 
         if mems is not None:
@@ -476,7 +477,7 @@ class RelPartialLearnableDecoderLayer(nn.Module):
                                         moe_top_k=kwargs.get('moe_top_k'))
 
     def forward(self, dec_inp, r, r_w_bias, r_r_bias, dec_attn_mask=None, mems=None, layer_idx=None):
-
+        print(f"Inside RelPartialLearnableDecoderLayer, layer_idx: {layer_idx}")
         output = self.dec_attn(dec_inp, r, r_w_bias, r_r_bias,
                                attn_mask=dec_attn_mask,
                                mems=mems,layer_idx=layer_idx)
@@ -738,6 +739,7 @@ class MemTransformerLM(nn.Module):
             hids.append(core_out)
             for i, layer in enumerate(self.layers):
                 mems_i = None if mems is None else mems[i]
+                print(f"Before calling layer {i}, layer_idx: {i}") 
                 core_out = layer(core_out, pos_emb, self.r_w_bias,
                         self.r_r_bias, dec_attn_mask=dec_attn_mask, mems=mems_i,layer_idx=i)
                 
@@ -763,6 +765,7 @@ class MemTransformerLM(nn.Module):
                     r_emb, r_bias = self.r_emb[i], self.r_bias[i]
 
                 mems_i = None if mems is None else mems[i]
+                print(f"Before calling layer {i}, layer_idx: {i}") 
                 core_out = layer(core_out, r_emb, self.r_w_bias[i],
                         r_bias, dec_attn_mask=dec_attn_mask, mems=mems_i,layer_idx=i)
                 hids.append(core_out)
@@ -778,6 +781,7 @@ class MemTransformerLM(nn.Module):
             hids.append(core_out)
             for i, layer in enumerate(self.layers):
                 mems_i = None if mems is None else mems[i]
+                print(f"Before calling layer {i}, layer_idx: {i}") 
                 if mems_i is not None and i == 0:
                     mems_i += pos_emb[:mlen]
                 core_out = layer(core_out, dec_attn_mask=dec_attn_mask,
@@ -789,6 +793,7 @@ class MemTransformerLM(nn.Module):
             hids.append(core_out)
             for i, layer in enumerate(self.layers):
                 mems_i = None if mems is None else mems[i]
+                print(f"Before calling layer {i}, layer_idx: {i}") 
                 if mems_i is not None and mlen > 0:
                     cur_emb = self.r_emb[i][:-qlen]
                     cur_size = cur_emb.size(0)

@@ -187,6 +187,7 @@ class FMoE(nn.Module):
         r"""
         forward single expert for smart scheduling.
         """
+        print("forwarding, check idx",idx)
         assert not self.experts_fused, "should not use fused experts"
         output = self.experts[idx](inp, fwd_expert_count)
         return output
