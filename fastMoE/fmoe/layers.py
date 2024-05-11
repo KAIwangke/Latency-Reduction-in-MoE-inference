@@ -128,7 +128,7 @@ class FMoE(nn.Module):
         mask=None,
         mask_dict=None,
         gate_bias=True,
-        num_layers=None  # Add this argument
+        num_layers=None  # numlayer for collect each layer
     ):
         super().__init__()
         self.num_expert = num_expert
@@ -165,6 +165,8 @@ class FMoE(nn.Module):
         self.mask = mask
         self.mask_dict = mask_dict
         self.moe_group = moe_group
+        # init
+        self.expert_counts = [torch.zeros(self.num_expert) for _ in range(num_layers)]
 
     def get_most_selected_experts(self):
         most_selected_experts = {}
@@ -254,7 +256,7 @@ class FMoE(nn.Module):
             self.gate_hook(gate_top_k_idx, gate_score, None)
 
         '''
-        Note: 
+        Note: actual calculation
         
         '''    
         chosen_experts = torch.argmax(gate_top_k_idx, dim=-1)
