@@ -13,7 +13,8 @@ NNODES=1
 NODE_RANK=0
 WORLD_SIZE=$(($GPUS_PER_NODE*$NNODES))
 
-DATA_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/openwebtext_subset_text_document
+# DATA_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/openwebtext_subset_text_document
+DATA_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/codeparrot_content_document
 CHECKPOINT_PATH=/home/yn2161/ke/mlsys/fastMoE/examples/megatron/Megatron-LM-2.5/experiment
 
 DISTRIBUTED_ARGS="--nproc_per_node $GPUS_PER_NODE --nnodes $NNODES --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT"
@@ -37,7 +38,7 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --vocab-file vocab.json \
        --merge-file merges.txt \
        --data-impl mmap \
-       --split 951,49,1 \
+       --split 1,49,950 \
        --distributed-backend nccl \
        --lr 0.00015 \
        --lr-decay-style cosine \
