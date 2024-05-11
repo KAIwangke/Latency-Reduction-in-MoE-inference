@@ -70,7 +70,8 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
 
 
     # print("the updated res")
-    res[0] = True
+    # res[0] = True
+    # res[1] = True
     # print(res)
     # shadowed_experts = torch.nonzero(res).flatten().tolist()
     # print(f"Shadowed experts: {shadowed_experts}")

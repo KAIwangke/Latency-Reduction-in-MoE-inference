@@ -701,6 +701,7 @@ def train(forward_step_func, model, optimizer, lr_scheduler,
 
 def evaluate(forward_step_func, data_iterator, model, verbose=False):
     """Evaluation."""
+    timers = get_timers()
     args = get_args()
 
     # Turn on evaluation mode which disables dropout.
@@ -710,6 +711,8 @@ def evaluate(forward_step_func, data_iterator, model, verbose=False):
     total_loss_dict = {}
 
     with torch.no_grad():
+        timers('evaluation').start() 
+        report_memory('before evaluation')
         iteration = 0
         while iteration < args.eval_iters:
             iteration += 1
@@ -732,6 +735,11 @@ def evaluate(forward_step_func, data_iterator, model, verbose=False):
             args.consumed_valid_samples += mpu.get_data_parallel_world_size() \
                                            * args.micro_batch_size \
                                            * get_num_microbatches()
+        timers('evaluation').stop() 
+        timers.log(['evaluation'])
+        report_memory('after evaluation')
+
+
     # Move model back to the train mode.
     for model_module in model:
         model_module.train()
