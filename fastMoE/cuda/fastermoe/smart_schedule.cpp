@@ -100,6 +100,8 @@ std::vector<torch::Tensor> _smart_sch_forward(
     auto global_output_buf = input_buf.new_zeros({global_batch_size, d_model});
     auto output_buf = input_buf.new_zeros({input_buf.size(0), d_model});
 
+
+// the actual function doing the scatter to the device
     std::vector<torch::Tensor> params;
     auto stored_models_ = stored_models.data_ptr<bool>();
     for (long i = 0; i < num_expert * n_workers; ++i) {

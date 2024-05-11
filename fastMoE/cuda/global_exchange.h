@@ -45,6 +45,9 @@ void fmoe_cuda_global_scatter_impl(
             */            
             int idx = i + j * n_expert;
             if (local_expert_count[idx]) {
+                if(j==0){
+                    printf("local: this is the check for which expert: %d on device: %zu\n", idx, j);
+                }
                 NCCL_SAFE_CALL(ncclSend(
                         // calculates the total size of the data to send. 
                         // local_expert_count[idx] gives the number of data elements for the expert
@@ -58,7 +61,7 @@ void fmoe_cuda_global_scatter_impl(
             if (global_expert_count[idx]) {
                 /*only print the device 0*/
                 if(j==0){
-                    printf("this is the check for which expert: %d on device: %zu\n", idx, j);
+                    printf("global: this is the check for which expert: %d on device: %zu\n", idx, j);
                 }
                 NCCL_SAFE_CALL(ncclRecv(
                         input_buf + recv_ptr * in_feat,
