@@ -620,12 +620,12 @@ def train(forward_step_func, model, optimizer, lr_scheduler,
 
     # Iterations.
     # args.train_iters = 1
-    # iteration = args.iteration
+    iteration = args.iteration
     # args.train_iters = 1
     timers('interval-time').start()
     print_datetime('before the start of training step')
     report_memory_flag = True
-    while iteration < 10 :
+    while iteration <  args.train_iters:
         update_num_microbatches(args.consumed_train_samples)
         loss_dict, skipped_iter, grad_norm, num_zeros_in_grad = \
             train_step(forward_step_func,
