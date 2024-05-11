@@ -22,14 +22,14 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        pretrain_gpt.py \
        --tensor-model-parallel-size 1 \
        --pipeline-model-parallel-size 1 \
-       --num-layers 3 \
-       --hidden-size 8 \
+       --num-layers 8 \
+       --hidden-size 16 \
        --num-attention-heads 4 \
        --micro-batch-size 4 \
        --global-batch-size 16 \
        --seq-length 1024 \
        --max-position-embeddings 1024 \
-       --train-iters 1 \
+       --train-iters 10 \
        --lr-decay-iters 320000 \
        --save $CHECKPOINT_PATH \
        --load $CHECKPOINT_PATH \
