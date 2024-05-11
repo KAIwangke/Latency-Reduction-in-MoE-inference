@@ -801,7 +801,7 @@ class MemTransformerLM(nn.Module):
                 core_out += self.r_emb[i][-qlen:].view(qlen, 1, -1)
 
                 core_out = layer(core_out, dec_attn_mask=dec_attn_mask,
-                                 mems=mems_i)
+                                 mems=mems_i,layer_idx=i)
                 hids.append(core_out)
 
         core_out = self.drop(core_out)
