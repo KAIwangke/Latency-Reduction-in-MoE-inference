@@ -239,6 +239,7 @@ class FMoE(nn.Module):
         mlsys: the self.gate compute the output of the token which expert been chosen
         '''
         # print("forward func layer idx : ",layer_idx)
+        print("getting into the gate")
         gate_top_k_idx, gate_score = self.gate(moe_inp, layer_idx=layer_idx)
         
         if self.gate_hook is not None:
@@ -255,6 +256,8 @@ class FMoE(nn.Module):
             mask = self.mask.view(-1)
             moe_inp = tree.map_structure(delete_mask_func, moe_inp)
             gate_top_k_idx = gate_top_k_idx[mask == 0, :]
+            print("forward func layer idx : ",layer_idx,", the top_k_idx_expert is: ",gate_top_k_idx)
+
         print("_fmoe_general_global_forward")
         fwd = _fmoe_general_global_forward(
             moe_inp, gate_top_k_idx, self.expert_fn_single if fmoe_faster_schedule else self.expert_fn,
