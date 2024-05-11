@@ -264,8 +264,8 @@ class FMoE(nn.Module):
         unique_experts, counts = torch.unique(chosen_experts, return_counts=True)
         device = chosen_experts.device
         print("shape of the chosen_exper: ",chosen_experts.shape)
-        print("expert counts shape",self.expert_counts.shape)
         self.expert_counts[layer_idx] = self.expert_counts[layer_idx].to(device)
+        print("expert counts",self.expert_counts)
 
         for expert, count in zip(unique_experts, counts):
             self.expert_counts[layer_idx][expert] += count
