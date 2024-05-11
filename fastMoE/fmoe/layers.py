@@ -262,6 +262,9 @@ class FMoE(nn.Module):
         '''    
         chosen_experts = torch.argmax(gate_top_k_idx, dim=-1)
         unique_experts, counts = torch.unique(chosen_experts, return_counts=True)
+        device = chosen_experts.device
+        self.expert_counts[layer_idx] = self.expert_counts[layer_idx].to(device)
+        
         for expert, count in zip(unique_experts, counts):
             self.expert_counts[layer_idx][expert] += count
         
