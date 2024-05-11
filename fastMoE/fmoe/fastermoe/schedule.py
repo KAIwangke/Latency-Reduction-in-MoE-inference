@@ -136,7 +136,9 @@ def _fmoe_general_global_forward(inp, gate, expert_fn, n_expert, world_size, exp
     global policy_fn
     if policy_fn is None:
         policy_fn = get_shadow_policy(d_model=inp.shape[-1])
+    print(policy_fn)
 
+    print("\n\n\n")
     if stored_models is None:
         stored_models = policy_fn(local_expert_count, global_expert_count,
                 n_expert, world_size)
