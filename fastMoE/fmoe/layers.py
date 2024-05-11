@@ -256,7 +256,8 @@ class FMoE(nn.Module):
             mask = self.mask.view(-1)
             moe_inp = tree.map_structure(delete_mask_func, moe_inp)
             gate_top_k_idx = gate_top_k_idx[mask == 0, :]
-            print("forward func layer idx : ",layer_idx,", the top_k_idx_expert is: ",gate_top_k_idx)
+            
+        print("forward func layer idx : ",layer_idx,", the top_k_idx_expert is: ",gate_top_k_idx)
 
         print("_fmoe_general_global_forward")
         fwd = _fmoe_general_global_forward(
