@@ -22,7 +22,7 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
     bw_mm = float_from_env('FMOE_FASTER_GLBPLC_GPUTP', 11.5e12)
     alpha = float_from_env('FMOE_FASTER_GLBPLC_ALPHA', 2)
     d_model = float_from_env('FMOE_FASTER_GLBPLC_DMODEL', 2048)
-    print(bw_mm,bw_net,alpha,d_model)
+    # print(bw_mm,bw_net,alpha,d_model)
     moe_group = get_moe_group()
     local_expert_count = local_expert_count.cuda()
     agecs = [torch.empty_like(local_expert_count) for _ in range(world_size)]
@@ -80,7 +80,7 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
 
 
 def no_shadow_policy(_lec, _gec, num_expert, world_size):
-    print("no shadow policy")
+    # print("no shadow policy")
     res = torch.zeros(world_size * num_expert, dtype=bool)
     return res
 
