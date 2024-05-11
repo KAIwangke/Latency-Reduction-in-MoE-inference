@@ -50,7 +50,7 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
 
 
     shadow_time = 0
-
+    print(indices)
     for i, index in enumerate(indices):
 
         if i + 1 == indices.numel():
