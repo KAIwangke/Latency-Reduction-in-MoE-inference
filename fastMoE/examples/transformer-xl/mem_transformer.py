@@ -764,7 +764,7 @@ class MemTransformerLM(nn.Module):
 
                 mems_i = None if mems is None else mems[i]
                 core_out = layer(core_out, r_emb, self.r_w_bias[i],
-                        r_bias, dec_attn_mask=dec_attn_mask, mems=mems_i)
+                        r_bias, dec_attn_mask=dec_attn_mask, mems=mems_i,layer_idx=i)
                 hids.append(core_out)
         elif self.attn_type == 2: # absolute
             pos_seq = torch.arange(klen - 1, -1, -1.0, device=word_emb.device,
@@ -781,7 +781,7 @@ class MemTransformerLM(nn.Module):
                 if mems_i is not None and i == 0:
                     mems_i += pos_emb[:mlen]
                 core_out = layer(core_out, dec_attn_mask=dec_attn_mask,
-                                 mems=mems_i)
+                                 mems=mems_i,layer_idx=i)
                 hids.append(core_out)
         elif self.attn_type == 3:
             core_out = self.drop(word_emb)
