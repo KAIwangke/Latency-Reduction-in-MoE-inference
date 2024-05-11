@@ -80,8 +80,8 @@ class MegatronMLP(FMoETransformerMLP):
         #     moe_group = None
         # else:
         world_size = args.data_parallel_size
-        print("check the world size")        
-        print(world_size)
+        self.num_layers = args.num_layers
+        self.expert_counts = [torch.zeros(self.num_expert, dtype=torch.int32) for _ in range(self.num_layers)]
         from megatron.mpu import get_data_parallel_group
         moe_group = get_data_parallel_group()
         
