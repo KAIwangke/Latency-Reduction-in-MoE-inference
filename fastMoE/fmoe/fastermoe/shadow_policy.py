@@ -52,12 +52,13 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
     shadow_time = 0
 
     for i, index in enumerate(indices):
+
         if i + 1 == indices.numel():
             break
         B_k = B_ws[i + 1]
         shadow_time += send_model_time
         lat_new = 3 * comp_time * B_k + 4 * send_feature_time * B_k + shadow_time
-
+        print(lat_base,lat_new)
         if lat_new < lat_base:
             lat_base = lat_new
             res[index] = True

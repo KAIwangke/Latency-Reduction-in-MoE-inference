@@ -46,7 +46,7 @@ void fmoe_cuda_global_scatter_impl(
             int idx = i + j * n_expert;
             if (local_expert_count[idx]) {
                 NCCL_SAFE_CALL(ncclSend(
-                        //calculates the total size of the data to send. 
+                        // calculates the total size of the data to send. 
                         // local_expert_count[idx] gives the number of data elements for the expert
                         local_input_buf + expert_ptr[idx] * in_feat, 
                         local_expert_count[idx] * in_feat * sizeof(scalar_t),
