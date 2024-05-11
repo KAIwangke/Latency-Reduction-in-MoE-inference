@@ -48,12 +48,12 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
     lat_base = 3 * comp_time * B_w + 4 * send_feature_time * B_w
 
     res = torch.zeros(world_size * num_expert, dtype=torch.bool)
-    # print("lets check res")
-    # print(res)
+    print("lets check res")
+    print(res)
 
 
     shadow_time = 0
-    print(indices)
+    print("this is the indices",indices)
     for i, index in enumerate(indices):
 
         if i + 1 == indices.numel():
@@ -69,8 +69,8 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
             break
 
 
-    # print("the updated res")
-    # print(res)
+    print("the updated res")
+    print(res)
     # shadowed_experts = torch.nonzero(res).flatten().tolist()
     # print(f"Shadowed experts: {shadowed_experts}")
             
