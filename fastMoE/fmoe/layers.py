@@ -128,6 +128,7 @@ class FMoE(nn.Module):
         mask=None,
         mask_dict=None,
         gate_bias=True,
+        num_layers=None  # Add this argument
     ):
         super().__init__()
         self.num_expert = num_expert
@@ -165,6 +166,12 @@ class FMoE(nn.Module):
         self.mask_dict = mask_dict
         self.moe_group = moe_group
 
+    def get_most_selected_experts(self):
+        most_selected_experts = {}
+        for layer_idx in range(self.num_layers):
+            most_selected_experts[layer_idx] = torch.argmax(self.expert_counts[layer_idx]).item()
+        return most_selected_experts
+    
     def expert_fn(self, inp, fwd_expert_count):
         r"""
         The default expert function which either calls the experts as a whole
@@ -237,7 +244,7 @@ class FMoE(nn.Module):
 
 
         '''
-        mlsys: the self.gate compute the output of the token which expert been chosen
+        Note: the self.gate compute the output of the token which expert been chosen
         '''
         # print("forward func layer idx : ",layer_idx)
         print("getting into the gate")
@@ -246,6 +253,16 @@ class FMoE(nn.Module):
         if self.gate_hook is not None:
             self.gate_hook(gate_top_k_idx, gate_score, None)
 
+        '''
+        Note: 
+        
+        '''    
+        chosen_experts = torch.argmax(gate_top_k_idx, dim=-1)
+        unique_experts, counts = torch.unique(chosen_experts, return_counts=True)
+        for expert, count in zip(unique_experts, counts):
+            self.expert_counts[layer_idx][expert] += count
+        
+        print("Chosen experts at layer {}: {}".format(layer_idx, chosen_experts))
         # delete masked tensors
         if self.mask is not None and self.mask_dict is not None:
             # TODO: to fix
