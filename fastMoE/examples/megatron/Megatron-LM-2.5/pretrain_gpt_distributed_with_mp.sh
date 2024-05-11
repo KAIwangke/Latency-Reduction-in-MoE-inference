@@ -23,7 +23,7 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --tensor-model-parallel-size 1 \
        --pipeline-model-parallel-size 1 \
        --num-layers 8 \
-       --hidden-size 16 \
+       --hidden-size 256 \
        --num-attention-heads 4 \
        --micro-batch-size 4 \
        --global-batch-size 16 \
@@ -37,7 +37,7 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --vocab-file vocab.json \
        --merge-file merges.txt \
        --data-impl mmap \
-       --split 250,1,749 \
+       --split 951,49,1 \
        --distributed-backend nccl \
        --lr 0.00015 \
        --lr-decay-style cosine \
