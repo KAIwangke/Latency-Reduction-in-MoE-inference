@@ -29,7 +29,7 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --global-batch-size 16 \
        --seq-length 1024 \
        --max-position-embeddings 1024 \
-       --train-iters 10 \
+       --train-iters 100 \
        --lr-decay-iters 320000 \
        --save $CHECKPOINT_PATH \
        --load $CHECKPOINT_PATH \
