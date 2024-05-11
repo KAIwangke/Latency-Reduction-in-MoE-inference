@@ -24,8 +24,8 @@ python3 -m torch.distributed.run $DISTRIBUTED_ARGS \
        --pipeline-model-parallel-size 1 \
        --num-layers 8 \
        --hidden-size 256 \
-       --num-attention-heads 4 \
-       --micro-batch-size 4 \
+       --num-attention-heads 8 \
+       --micro-batch-size 8 \
        --global-batch-size 16 \
        --seq-length 1024 \
        --max-position-embeddings 1024 \
