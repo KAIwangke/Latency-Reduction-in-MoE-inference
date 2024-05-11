@@ -263,8 +263,9 @@ class FMoE(nn.Module):
         chosen_experts = torch.argmax(gate_top_k_idx, dim=-1)
         unique_experts, counts = torch.unique(chosen_experts, return_counts=True)
         device = chosen_experts.device
+        print("shape of the chosen_exper: ",chosen_experts.shape)
         self.expert_counts[layer_idx] = self.expert_counts[layer_idx].to(device)
-        
+
         for expert, count in zip(unique_experts, counts):
             self.expert_counts[layer_idx][expert] += count
         
@@ -281,6 +282,8 @@ class FMoE(nn.Module):
             moe_inp = tree.map_structure(delete_mask_func, moe_inp)
             gate_top_k_idx = gate_top_k_idx[mask == 0, :]
         print("forward func layer idx : ",layer_idx,", the top_k_idx_expert is: ",gate_top_k_idx)
+
+        print("Shape of gate_top_k_idx: ", gate_top_k_idx.shape)
 
         print("_fmoe_general_global_forward")
         fwd = _fmoe_general_global_forward(
