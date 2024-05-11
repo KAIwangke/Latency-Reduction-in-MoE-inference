@@ -23,59 +23,61 @@ def mark_module_parallel_comm(module, comm):
         setattr(p, "dp_comm", comm)
 
 
-def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, **kwargs):
-    r"""
-    A private function that performs the following steps to complete the MoE
-    computation.
-    * Count the number of tokens from each worker to each expert.
-    * Send the features to their target position so that input features to each
-    expert are contiguous in memory.
-    * Perform the forward computation of the experts using `expert_fn`
-    * Gather the output features of experts back, and reorder them as sentences.
-    Intermediate results like expert counts are hidden from users by this
-    function.
-    """
-    (
-        pos,
-        local_expert_count,
-        global_expert_count,
-        fwd_expert_count,
-        fwd_batch_size,
-    ) = prepare_forward(gate, num_expert, world_size)
-    topk = 1
-    if len(gate.shape) == 2:
-        topk = gate.shape[1]
 
-    def scatter_func(tensor):
-        # print("scatterfun")
-        return MOEScatter.apply(
-            tensor,
-            torch.div(pos, topk, rounding_mode='floor'),
-            local_expert_count,
-            global_expert_count,
-            fwd_batch_size,
-            world_size,
-        )
-    x = tree.map_structure(scatter_func, inp)
+# commented due to we explicitly using smarter schedule
+# def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, **kwargs):
+#     r"""
+#     A private function that performs the following steps to complete the MoE
+#     computation.
+#     * Count the number of tokens from each worker to each expert.
+#     * Send the features to their target position so that input features to each
+#     expert are contiguous in memory.
+#     * Perform the forward computation of the experts using `expert_fn`
+#     * Gather the output features of experts back, and reorder them as sentences.
+#     Intermediate results like expert counts are hidden from users by this
+#     function.
+#     """
+#     (
+#         pos,
+#         local_expert_count,
+#         global_expert_count,
+#         fwd_expert_count,
+#         fwd_batch_size,
+#     ) = prepare_forward(gate, num_expert, world_size)
+#     topk = 1
+#     if len(gate.shape) == 2:
+#         topk = gate.shape[1]
 
-    x = expert_fn(x, fwd_expert_count)
+#     def scatter_func(tensor):
+#         # print("scatterfun")
+#         return MOEScatter.apply(
+#             tensor,
+#             torch.div(pos, topk, rounding_mode='floor'),
+#             local_expert_count,
+#             global_expert_count,
+#             fwd_batch_size,
+#             world_size,
+#         )
+#     x = tree.map_structure(scatter_func, inp)
 
-    out_batch_size = tree.flatten(inp)[0].shape[0]
-    if len(gate.shape) == 2:
-        out_batch_size *= gate.shape[1]
+#     x = expert_fn(x, fwd_expert_count)
 
-    def gather_func(tensor):
-        return MOEGather.apply(
-            tensor,
-            pos,
-            local_expert_count,
-            global_expert_count,
-            out_batch_size,
-            world_size,
-        )
+#     out_batch_size = tree.flatten(inp)[0].shape[0]
+#     if len(gate.shape) == 2:
+#         out_batch_size *= gate.shape[1]
 
-    outp = tree.map_structure(gather_func, x)
-    return outp
+#     def gather_func(tensor):
+#         return MOEGather.apply(
+#             tensor,
+#             pos,
+#             local_expert_count,
+#             global_expert_count,
+#             out_batch_size,
+#             world_size,
+#         )
+
+#     outp = tree.map_structure(gather_func, x)
+#     return outp
 
 
 # fmoe_faster_schedule = False
