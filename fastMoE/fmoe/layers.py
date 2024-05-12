@@ -165,7 +165,11 @@ class FMoE(nn.Module):
         self.mask = mask
         self.mask_dict = mask_dict
         self.moe_group = moe_group
-        self.expert_counts = [torch.zeros(self.num_expert, dtype=torch.int32) for _ in range(self.num_layers)]
+        if(self.expert_counts is None):
+            self.expert_counts = [torch.zeros(self.num_expert, dtype=torch.int32) for _ in range(self.num_layers)]
+        else:
+            self.expert_counts = self.expert_counts
+
 
         # init
 
