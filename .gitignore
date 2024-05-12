@@ -4,3 +4,6 @@ fastMoE/examples/penn/
 fastMoE/examples/pennchar/
 fastMoE/examples/simple-examples.tgz
 fastMoE/examples/text8/
+fastMoE/examples/enwik8/
+fastMoE/examples/megatron/Megatron-LM-2.5/codeparrot_*
+__pycache__/
