@@ -10,7 +10,7 @@ from .functions import prepare_forward, ensure_comm
 from .functions import MOEScatter, MOEGather
 from .functions import AllGather, Slice
 from .gates import NaiveGate
-from .gates import NoisyGate
+
 from .fastermoe.config import switch_from_env
 
 
@@ -23,68 +23,65 @@ def mark_module_parallel_comm(module, comm):
         setattr(p, "dp_comm", comm)
 
 
+def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, **kwargs):
+    r"""
+    A private function that performs the following steps to complete the MoE
+    computation.
+    * Count the number of tokens from each worker to each expert.
+    * Send the features to their target position so that input features to each
+    expert are contiguous in memory.
+    * Perform the forward computation of the experts using `expert_fn`
+    * Gather the output features of experts back, and reorder them as sentences.
+    Intermediate results like expert counts are hidden from users by this
+    function.
+    """
+    (
+        pos,
+        local_expert_count,
+        global_expert_count,
+        fwd_expert_count,
+        fwd_batch_size,
+    ) = prepare_forward(gate, num_expert, world_size)
+    topk = 1
+    if len(gate.shape) == 2:
+        topk = gate.shape[1]
 
-# commented due to we explicitly using smarter schedule
-# def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, **kwargs):
-#     r"""
-#     A private function that performs the following steps to complete the MoE
-#     computation.
-#     * Count the number of tokens from each worker to each expert.
-#     * Send the features to their target position so that input features to each
-#     expert are contiguous in memory.
-#     * Perform the forward computation of the experts using `expert_fn`
-#     * Gather the output features of experts back, and reorder them as sentences.
-#     Intermediate results like expert counts are hidden from users by this
-#     function.
-#     """
-#     (
-#         pos,
-#         local_expert_count,
-#         global_expert_count,
-#         fwd_expert_count,
-#         fwd_batch_size,
-#     ) = prepare_forward(gate, num_expert, world_size)
-#     topk = 1
-#     if len(gate.shape) == 2:
-#         topk = gate.shape[1]
+    def scatter_func(tensor):
+        return MOEScatter.apply(
+            tensor,
+            torch.div(pos, topk, rounding_mode='floor'),
+            local_expert_count,
+            global_expert_count,
+            fwd_batch_size,
+            world_size,
+        )
 
-#     def scatter_func(tensor):
-#         # print("scatterfun")
-#         return MOEScatter.apply(
-#             tensor,
-#             torch.div(pos, topk, rounding_mode='floor'),
-#             local_expert_count,
-#             global_expert_count,
-#             fwd_batch_size,
-#             world_size,
-#         )
-#     x = tree.map_structure(scatter_func, inp)
+    x = tree.map_structure(scatter_func, inp)
 
-#     x = expert_fn(x, fwd_expert_count)
+    x = expert_fn(x, fwd_expert_count)
 
-#     out_batch_size = tree.flatten(inp)[0].shape[0]
-#     if len(gate.shape) == 2:
-#         out_batch_size *= gate.shape[1]
+    out_batch_size = tree.flatten(inp)[0].shape[0]
+    if len(gate.shape) == 2:
+        out_batch_size *= gate.shape[1]
 
-#     def gather_func(tensor):
-#         return MOEGather.apply(
-#             tensor,
-#             pos,
-#             local_expert_count,
-#             global_expert_count,
-#             out_batch_size,
-#             world_size,
-#         )
+    def gather_func(tensor):
+        return MOEGather.apply(
+            tensor,
+            pos,
+            local_expert_count,
+            global_expert_count,
+            out_batch_size,
+            world_size,
+        )
 
-#     outp = tree.map_structure(gather_func, x)
-#     return outp
+    outp = tree.map_structure(gather_func, x)
+    return outp
 
 
-# fmoe_faster_schedule = False
-# if switch_from_env('FMOE_FASTER_SCHEDULE_ENABLE', False):
-fmoe_faster_schedule = True
-from .fastermoe.schedule import _fmoe_general_global_forward
-import time
+fmoe_faster_schedule = False
+if switch_from_env('FMOE_FASTER_SCHEDULE_ENABLE', False):
+    fmoe_faster_schedule = True
+    from .fastermoe.schedule import _fmoe_general_global_forward
 
 
 class FMoE(nn.Module):
@@ -121,8 +118,7 @@ class FMoE(nn.Module):
         slice_group=None,
         moe_group=None,
         top_k=2,
-        # gate=NoisyGate,
-        gate = NaiveGate,
+        gate=NaiveGate,
         expert=None,
         gate_hook=None,
         mask=None,
@@ -133,7 +129,6 @@ class FMoE(nn.Module):
         self.num_expert = num_expert
         self.d_model = d_model
         self.world_size = world_size
-        
 
         self.slice_group = slice_group
         if mp_group is not None:
@@ -165,18 +160,7 @@ class FMoE(nn.Module):
         self.mask = mask
         self.mask_dict = mask_dict
         self.moe_group = moe_group
-        # if(self.expert_counts is None):
-        self.expert_counts = [torch.zeros(self.num_expert, dtype=torch.int32) for _ in range(self.num_layers)]
 
-
-        # init
-
-    def get_most_selected_experts(self):
-        most_selected_experts = {}
-        for layer_idx in range(self.num_layers):
-            most_selected_experts[layer_idx] = torch.argmax(self.expert_counts[layer_idx]).item()
-        return most_selected_experts
-    
     def expert_fn(self, inp, fwd_expert_count):
         r"""
         The default expert function which either calls the experts as a whole
@@ -199,7 +183,6 @@ class FMoE(nn.Module):
         r"""
         forward single expert for smart scheduling.
         """
-        # print("forwarding, check idx",idx)
         assert not self.experts_fused, "should not use fused experts"
         output = self.experts[idx](inp, fwd_expert_count)
         return output
@@ -219,12 +202,12 @@ class FMoE(nn.Module):
                 mark_module_parallel_comm(self.experts, comm)
         mark_module_parallel_comm(self.gate, "gate")
 
-    def forward(self, moe_inp, layer_idx=None):
+    def forward(self, moe_inp):
         r"""
         The FMoE module first computes gate output, and then conduct MoE forward
         according to the gate.  The score of the selected gate given by the
         expert is multiplied to the experts' output tensors as a weight.
-        """ 
+        """
 
         moe_inp_batch_size = tree.flatten(
             tree.map_structure(lambda tensor: tensor.shape[0], moe_inp)
@@ -234,6 +217,7 @@ class FMoE(nn.Module):
         ), "MoE inputs must have the same batch size"
 
         if self.world_size > 1:
+
             def ensure_comm_func(tensor):
                 ensure_comm(tensor, self.moe_group)
 
@@ -247,32 +231,11 @@ class FMoE(nn.Module):
 
             moe_inp = tree.map_structure(slice_func, moe_inp)
 
+        gate_top_k_idx, gate_score = self.gate(moe_inp)
 
-        '''
-        Note: the self.gate compute the output of the token which expert been chosen
-        '''
-        # print("forward func layer idx : ",layer_idx)
-        # print("getting into the gate")
-        gate_top_k_idx, gate_score = self.gate(moe_inp, layer_idx=layer_idx)
-        
         if self.gate_hook is not None:
             self.gate_hook(gate_top_k_idx, gate_score, None)
 
-        '''
-        Note: actual calculation
-        
-        '''    
-        chosen_experts = torch.argmax(gate_top_k_idx, dim=-1)
-        unique_experts, counts = torch.unique(chosen_experts, return_counts=True)
-        device = chosen_experts.device
-        # print("shape of the chosen_exper: ",chosen_experts.shape)
-        self.expert_counts[layer_idx] = self.expert_counts[layer_idx].to(device)
-        # print("expert counts",self.expert_counts)
-
-        for expert, count in zip(unique_experts, counts):
-            self.expert_counts[layer_idx][expert] += count
-        
-        # print("Chosen experts at layer {}: {}".format(layer_idx, chosen_experts))
         # delete masked tensors
         if self.mask is not None and self.mask_dict is not None:
             # TODO: to fix
@@ -284,11 +247,7 @@ class FMoE(nn.Module):
             mask = self.mask.view(-1)
             moe_inp = tree.map_structure(delete_mask_func, moe_inp)
             gate_top_k_idx = gate_top_k_idx[mask == 0, :]
-        # print("forward func layer idx : ",layer_idx,", the top_k_idx_expert is: ",gate_top_k_idx)
 
-        # print("Shape of gate_top_k_idx: ", gate_top_k_idx.shape)
-
-        # print("_fmoe_general_global_forward")
         fwd = _fmoe_general_global_forward(
             moe_inp, gate_top_k_idx, self.expert_fn_single if fmoe_faster_schedule else self.expert_fn,
             self.num_expert, self.world_size,

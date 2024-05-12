@@ -75,19 +75,14 @@ class MegatronMLP(FMoETransformerMLP):
     """
 
     def __init__(self, args, layer_idx, gate=None):
-        # if not args.distributed_experts:
-        #     world_size = 1
-        #     moe_group = None
-        # else:
-        world_size = args.data_parallel_size
-        self.num_layers = args.num_layers
+        if not args.distributed_experts:
+            world_size = 1
+            moe_group = None
+        else:
+            world_size = args.data_parallel_size
+            from megatron.mpu import get_data_parallel_group
+            moe_group = get_data_parallel_group()
 
-
-        from megatron.mpu import get_data_parallel_group
-        moe_group = get_data_parallel_group()
-        
-        
-        args.balance_strategy = "naive"
         if not args.balance_strategy or args.balance_strategy == "naive":
             from fmoe.gates import NaiveGate
             gate = NaiveGate
@@ -126,7 +121,6 @@ class MegatronMLP(FMoETransformerMLP):
             self.rank = 0
         self.sigma = args.init_method_std
         self.num_layers = args.num_layers
-        self.layer_idx = layer_idx 
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -153,8 +147,7 @@ class MegatronMLP(FMoETransformerMLP):
 
     def forward(self, inp):
         from megatron import mpu
-        # x = super().forward(inp)
-        x = super().forward(inp, layer_idx=self.layer_idx)
+        x = super().forward(inp)
         x = mpu.reduce_from_tensor_model_parallel_region(x)
         return (
             x,
@@ -205,18 +198,12 @@ def fmoefy(
 
     if megatron_version == "v2.2":
 
-        print("*"*100)
-        print("wrong megatron_version")
-        print("*"*100)
         for idx, l in enumerate(model.language_model.transformer.layers):
             l.mlp = MegatronMLP(args, idx, gate=gate)
 
         # initialize gate hook
         num_layers = len(model.language_model.transformer.layers)
     elif megatron_version in ["v2.5", "v3.0.2"]:
-        # print("*"*100)
-        # print("correct megatron_version")
-        # print("*"*100)
         
         for idx, l in enumerate(model.language_model.encoder.layers):
             l.mlp = MegatronMLP(args, idx, gate=gate)

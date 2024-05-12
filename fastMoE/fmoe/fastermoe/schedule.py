@@ -59,7 +59,7 @@ class MoEForward(Function):
         def stash_fn(params, store_idx, expert_idx):
             expert_utils.stash_expert_params(experts, params, expert_idx)
             ctx.shadows[store_idx] = params
-        # print("smart schedule forward")   yes 
+
         local_output_buf, gib = fmoe_native.smart_sch_forward(
                 local_input_buf,
                 local_expert_count, global_expert_count, 
@@ -77,11 +77,6 @@ class MoEForward(Function):
         ctx.moe_args = fwd_batch_size, inp.shape[0], num_expert, world_size
         ctx.save_for_backward(*variables)
 
-
-        # if stored_models.any():
-        #     shadowed_experts = torch.nonzero(stored_models).flatten().tolist()
-            # print(f"Shadowed experts: {shadowed_experts}")
-        
         return out
 
     @staticmethod
@@ -132,15 +127,12 @@ def _fmoe_general_global_forward(inp, gate, expert_fn, n_expert, world_size, exp
         fwd_expert_count,
         fwd_batch_size,
     ) = prepare_forward(gate, n_expert, world_size)
-    # print("version of _fmoe_general_global_forward enabled the shadow policy")
+
     global policy_fn
     if policy_fn is None:
         policy_fn = get_shadow_policy(d_model=inp.shape[-1])
-    # print(policy_fn)
 
-    # print("\n\n\n")
     if stored_models is None:
-        # print("updating the stored model")
         stored_models = policy_fn(local_expert_count, global_expert_count,
                 n_expert, world_size)
 

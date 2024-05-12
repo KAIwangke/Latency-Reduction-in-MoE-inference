@@ -46,7 +46,6 @@ class SwitchGate(NaiveGate):
         _new_lec, _new_gec, top1_idx = limit_by_capacity(
                 top1_idx, self.num_expert, self.world_size, capacity)
 
-
         valid_idx = top1_idx[top1_idx > -1]
         fraction_expert = torch.scatter_add(
                 torch.zeros(self.tot_expert, device=valid_idx.device),

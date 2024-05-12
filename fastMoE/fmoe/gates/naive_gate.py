@@ -23,7 +23,7 @@ class NaiveGate(BaseGate):
         self.gate = nn.Linear(d_model, self.tot_expert, bias = gate_bias)
         self.top_k = top_k
 
-    def forward(self, inp, return_all_scores=False,layer_idx=None):
+    def forward(self, inp, return_all_scores=False):
         r"""
         The naive implementation simply calculates the top-k of a linear layer's
         output.
@@ -32,14 +32,6 @@ class NaiveGate(BaseGate):
         gate_top_k_val, gate_top_k_idx = torch.topk(
             gate, k=self.top_k, dim=-1, largest=True, sorted=False
         )  # [.. x top_k]
-        
-        # Get the index of the first chosen expert for each token
-        chosen_experts = gate_top_k_idx[..., 0]
-        # Print the chosen experts for each token at the current layer
-        # if layer_idx is not None:
-        #     print(f"Chosen experts at layer {layer_idx}:",chosen_experts)
-    
-
         gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
 
         # (BxL) x 1 x top_k
