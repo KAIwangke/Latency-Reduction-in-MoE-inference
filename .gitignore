@@ -7,3 +7,7 @@ fastMoE/examples/text8/
 fastMoE/examples/enwik8/
 fastMoE/examples/megatron/Megatron-LM-2.5/codeparrot_*
 __pycache__/
+.Python
+build/
+develop-eggs/
+dist/
