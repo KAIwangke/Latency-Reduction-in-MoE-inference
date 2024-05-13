@@ -50,8 +50,16 @@ def model_provider(pre_process=True, post_process=True):
         pre_process=pre_process,
         post_process=post_process
     )
-    model = fmoefy(model, fmoe_num_experts = 8,distributed_experts=True, hidden_hidden_size=64,top_k = 2,megatron_version="v2.5")
+    model = fmoefy(
+            model, 
+            fmoe_num_experts = 8,
+            distributed_experts=True, 
+            hidden_hidden_size=64,
+            top_k = 2,
+            megatron_version="v2.5"
+        )
 
+    
     return model
 
 
@@ -130,9 +138,9 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
     print_rank_0("> finished creating GPT datasets ...")
 
     return train_ds, valid_ds, test_ds
-
+    
 
 if __name__ == "__main__":
 
     pretrain(train_valid_test_datasets_provider, model_provider, forward_step,
-             args_defaults={'tokenizer_type': 'GPT2BPETokenizer'})
+             args_defaults={'tokenizer_type': 'GPT2BPETokenizer'},quant=False)

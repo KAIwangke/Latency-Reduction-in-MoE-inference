@@ -15,6 +15,7 @@
 
 """Pretrain utilities."""
 
+import modelopt.torch.quantization as atq
 from datetime import datetime
 import math
 import sys
@@ -72,7 +73,8 @@ def pretrain(train_valid_test_dataset_provider,
              model_provider,
              forward_step_func,
              extra_args_provider=None,
-             args_defaults={}):
+             args_defaults={},
+             quant=False):
     """Main training program.
 
     This function will run the followings in the order provided:
@@ -147,12 +149,19 @@ def pretrain(train_valid_test_dataset_provider,
     timers('train/valid/test-data-iterators-setup').stop()
     print_datetime('after dataloaders are built')
 
+    if quant:
+        config = atq.FP8_DEFAULT_CFG
+        for module in model:
+            def calibrate_loop():
+                forward_step_func(test_data_iterator,module)
+            atq.quantize(module, config, forward_loop=calibrate_loop    )
     # Print setup timing.
     print_rank_0('done with setup ...')
     timers.log(['model-and-optimizer-setup', 'train/valid/test-data-iterators-setup'])
     print_rank_0('training ...')
 
     iteration = 0
+    """
     if args.do_train and args.train_iters > 0:
         iteration = train(forward_step_func,
                           model, optimizer, lr_scheduler,
@@ -164,11 +173,12 @@ def pretrain(train_valid_test_dataset_provider,
         evaluate_and_print_results(prefix, forward_step_func,
                                    valid_data_iterator, model,
                                    iteration, False)
-
+    """
     if args.save and iteration != 0:
         save_checkpoint(iteration, model, optimizer, lr_scheduler)
 
     if args.do_test:
+        print("inference")
         # Run on test data.
         prefix = 'the end of training for test data'
         evaluate_and_print_results(prefix, forward_step_func,
@@ -356,7 +366,7 @@ def setup_model_and_optimizer(model_provider_func):
         unwrapped_model[0].init_state_dict_from_bert()
         if args.fp16:
             optimizer.reload_model_params()
-
+    
     return model, optimizer, lr_scheduler
 
 
