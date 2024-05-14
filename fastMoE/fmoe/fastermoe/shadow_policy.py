@@ -7,8 +7,8 @@ from .config import float_from_env, switch_from_env
 from fmoe.functions import get_moe_group
 
 
-def global_policy(local_expert_count, _gec, num_expert, world_size):
-
+# def global_policy(local_expert_count, _gec, num_expert, world_size):
+def global_policy(local_expert_count, _gec, num_expert, world_size, expert_counts):    
     # print("the actual global policy for echecking which expert to shadow") yes May 10 7:01pm
     r"""
     This is the policy for two-layer MLPs, using the formula in the PPoPP paper.
@@ -71,6 +71,10 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
 
     # print("the updated res")
     res[0] = True
+
+    print("access global expert count")
+    print(expert_counts)
+
     # res[1] = True
     # for adding the popularity to the res lock the expert to boardcast
 

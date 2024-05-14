@@ -111,6 +111,9 @@ class FMoE(nn.Module):
     * `gate_bias` is only valid for naive_gate and its subclasses, it means
     whether to add bias to the gate module.
     """
+# once
+    expert_counts_initialized = False
+    expert_counts = None    
 
     def __init__(
         self,
@@ -165,8 +168,10 @@ class FMoE(nn.Module):
         self.mask = mask
         self.mask_dict = mask_dict
         self.moe_group = moe_group
-        # if(self.expert_counts is None):
-        self.expert_counts = [torch.zeros(self.num_expert, dtype=torch.int32) for _ in range(self.num_layers)]
+        # Initialize expert_counts as a class variable if not already initialized
+        if not FMoE.expert_counts_initialized:
+            FMoE.expert_counts = [torch.zeros(num_expert, dtype=torch.int32) for _ in range(self.num_layers)]
+            FMoE.expert_counts_initialized = True
 
 
         # init
@@ -293,6 +298,7 @@ class FMoE(nn.Module):
             moe_inp, gate_top_k_idx, self.expert_fn_single if fmoe_faster_schedule else self.expert_fn,
             self.num_expert, self.world_size,
             experts=self.experts
+            expert_counts=self.expert_counts
         )
 
         # recover deleted tensors
