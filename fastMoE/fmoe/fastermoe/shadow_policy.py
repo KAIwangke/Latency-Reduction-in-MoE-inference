@@ -73,6 +73,7 @@ def global_policy(local_expert_count, _gec, num_expert, world_size, expert_count
     res[0] = True
 
     print("access global expert count")
+    print(layer_idx)
     print(expert_counts)
 
     # res[1] = True
