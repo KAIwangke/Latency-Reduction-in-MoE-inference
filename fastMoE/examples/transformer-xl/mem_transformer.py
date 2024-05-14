@@ -560,9 +560,9 @@ class MemTransformerLM(nn.Module):
         super(MemTransformerLM, self).__init__()
         self.n_token = n_token
 
-        self.expert_counts = {}
+        self.experts_popularity = {}
         for i in range(n_layer):
-            self.expert_counts[i] = torch.zeros(moe_num_expert, dtype=torch.long)        
+            self.experts_popularity[i] = torch.zeros(moe_num_expert, dtype=torch.long)        
 
         d_embed = d_model if d_embed is None else d_embed
         self.d_embed = d_embed
@@ -748,9 +748,9 @@ class MemTransformerLM(nn.Module):
                     '''
                     transfer the idx back to the device
                     '''
-                    expert_idx = expert_idx.to(self.expert_counts[i].device)
+                    expert_idx = expert_idx.to(self.experts_popularity[i].device)
                     expert_idx = expert_idx % self.moe_num_expert  
-                    self.expert_counts[i][expert_idx] += 1  
+                    self.experts_popularity[i][expert_idx] += 1  
 
 
                 hids.append(core_out)
@@ -826,7 +826,7 @@ class MemTransformerLM(nn.Module):
 
         # if epoch is not None:
         for i in range(self.n_layer):
-            self.expert_counts[i] = torch.zeros_like(self.expert_counts[i])        
+            self.experts_popularity[i] = torch.zeros_like(self.experts_popularity[i])        
         hidden, new_mems = self._forward(data, mems=mems)
 
         pred_hid = hidden[-tgt_len:]

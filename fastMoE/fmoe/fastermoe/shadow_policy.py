@@ -8,7 +8,7 @@ from fmoe.functions import get_moe_group
 
 
 # def global_policy(local_expert_count, _gec, num_expert, world_size):
-def global_policy(local_expert_count, _gec, num_expert, world_size, expert_counts,layer_idx):    
+def global_policy(local_expert_count, _gec, num_expert, world_size, experts_popularity,layer_idx):    
     # print("the actual global policy for echecking which expert to shadow") yes May 10 7:01pm
     r"""
     This is the policy for two-layer MLPs, using the formula in the PPoPP paper.
@@ -31,11 +31,11 @@ def global_policy(local_expert_count, _gec, num_expert, world_size, expert_count
     # # TODO: data type other than float
     # data_size = 4 
 
-    # fwd_expert_counts = all_global_expert_count.sum(1).cpu()
+    # fwd_experts_popularity = all_global_expert_count.sum(1).cpu()
     # # print(all_global_expert_count)
-    # # print(fwd_expert_counts.flatten())
+    # # print(fwd_experts_popularity.flatten())
     
-    # B_ws, indices = fwd_expert_counts.flatten().sort(0, descending=True)
+    # B_ws, indices = fwd_experts_popularity.flatten().sort(0, descending=True)
     # # print("this is the indices",indices)
 
     # alphaH2 = alpha * (d_model ** 2)
@@ -74,13 +74,10 @@ def global_policy(local_expert_count, _gec, num_expert, world_size, expert_count
 
     # print("access global expert count")
     # print(layer_idx)
-    # print(expert_counts)
-
-    max_idx = torch.argmax(expert_counts[layer_idx]).item()
-
-    print(max_idx)
+    # print(experts_popularity)
+    
+    max_idx = torch.argmax(experts_popularity[layer_idx]).item()
     res[max_idx] = True    
-
     # res[1] = True
     # for adding the popularity to the res lock the expert to boardcast
 

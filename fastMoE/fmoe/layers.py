@@ -112,8 +112,8 @@ class FMoE(nn.Module):
     whether to add bias to the gate module.
     """
 # once
-    expert_counts_initialized = False
-    expert_counts = None    
+    experts_popularity_initialized = False
+    experts_popularity = None    
 
     def __init__(
         self,
@@ -168,10 +168,10 @@ class FMoE(nn.Module):
         self.mask = mask
         self.mask_dict = mask_dict
         self.moe_group = moe_group
-        # Initialize expert_counts as a class variable if not already initialized
-        if not FMoE.expert_counts_initialized:
-            FMoE.expert_counts = [torch.zeros(num_expert, dtype=torch.int32) for _ in range(self.num_layers)]
-            FMoE.expert_counts_initialized = True
+        # Initialize experts_popularity as a class variable if not already initialized
+        if not FMoE.experts_popularity_initialized:
+            FMoE.experts_popularity = [torch.zeros(num_expert, dtype=torch.int32) for _ in range(self.num_layers)]
+            FMoE.experts_popularity_initialized = True
 
 
         # init
@@ -179,7 +179,7 @@ class FMoE(nn.Module):
     def get_most_selected_experts(self):
         most_selected_experts = {}
         for layer_idx in range(self.num_layers):
-            most_selected_experts[layer_idx] = torch.argmax(self.expert_counts[layer_idx]).item()
+            most_selected_experts[layer_idx] = torch.argmax(self.experts_popularity[layer_idx]).item()
         return most_selected_experts
     
     def expert_fn(self, inp, fwd_expert_count):
@@ -271,11 +271,11 @@ class FMoE(nn.Module):
         unique_experts, counts = torch.unique(chosen_experts, return_counts=True)
         device = chosen_experts.device
         # print("shape of the chosen_exper: ",chosen_experts.shape)
-        self.expert_counts[layer_idx] = self.expert_counts[layer_idx].to(device)
-        # print("expert counts",self.expert_counts)
+        self.experts_popularity[layer_idx] = self.experts_popularity[layer_idx].to(device)
+        # print("expert counts",self.experts_popularity)
 
         for expert, count in zip(unique_experts, counts):
-            self.expert_counts[layer_idx][expert] += count
+            self.experts_popularity[layer_idx][expert] += count
         
         # print("Chosen experts at layer {}: {}".format(layer_idx, chosen_experts))
         # delete masked tensors
@@ -299,7 +299,7 @@ class FMoE(nn.Module):
             self.num_expert, self.world_size,
             experts=self.experts,
             layer_idx=layer_idx,
-            expert_counts=self.expert_counts
+            experts_popularity=self.experts_popularity
         )
 
         # recover deleted tensors

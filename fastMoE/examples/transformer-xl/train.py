@@ -456,9 +456,9 @@ def trace_function_calls(frame, event, arg):
     return trace_function_calls
 
 
-expert_counts = {}
+experts_popularity = {}
 for i in range(args.n_layer):
-    expert_counts[i] = torch.zeros(args.moe_num_expert, dtype=torch.long, device=device)
+    experts_popularity[i] = torch.zeros(args.moe_num_expert, dtype=torch.long, device=device)
 
 
 
@@ -493,8 +493,8 @@ def train():
             
             # adding the loop for each layer to collect the expert chosen situation
             for i in range(args.n_layer):
-                if hasattr(para_model.module, 'layers') and hasattr(para_model.module.layers[i], 'expert_counts'):
-                    expert_counts[i] += para_model.module.layers[i].expert_counts.to(device)  
+                if hasattr(para_model.module, 'layers') and hasattr(para_model.module.layers[i], 'experts_popularity'):
+                    experts_popularity[i] += para_model.module.layers[i].experts_popularity.to(device)  
 
 
             loss = loss.float().mean().type_as(loss)
@@ -601,7 +601,7 @@ try:
         # Print expert counts after each epoch
         logging('-' * 100)
         logging(f"Epoch {epoch} - Expert Counts:")
-        for layer_idx, counts in expert_counts.items():
+        for layer_idx, counts in experts_popularity.items():
             logging(f"Layer {layer_idx + 1}:")
             for expert_idx, count in enumerate(counts):
                 logging(f"Expert {expert_idx + 1}: {count.item()}")
@@ -609,7 +609,7 @@ try:
 
         # Reset expert counts for the next epoch
         for i in range(args.n_layer):
-            expert_counts[i] = torch.zeros(args.moe_num_expert, dtype=torch.long, device=device)
+            experts_popularity[i] = torch.zeros(args.moe_num_expert, dtype=torch.long, device=device)
 
         if train_step == args.max_step:
             logging('-' * 100)
