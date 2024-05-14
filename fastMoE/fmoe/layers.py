@@ -297,7 +297,7 @@ class FMoE(nn.Module):
         fwd = _fmoe_general_global_forward(
             moe_inp, gate_top_k_idx, self.expert_fn_single if fmoe_faster_schedule else self.expert_fn,
             self.num_expert, self.world_size,
-            experts=self.experts
+            experts=self.experts,
             expert_counts=self.expert_counts
         )
 
