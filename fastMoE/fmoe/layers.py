@@ -293,7 +293,7 @@ class FMoE(nn.Module):
 
         # print("Shape of gate_top_k_idx: ", gate_top_k_idx.shape)
 
-        print("_fmoe_general_global_forward")
+        # print("_fmoe_general_global_forward")
         fwd = _fmoe_general_global_forward(
             moe_inp, gate_top_k_idx, self.expert_fn_single if fmoe_faster_schedule else self.expert_fn,
             self.num_expert, self.world_size,
