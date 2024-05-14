@@ -122,7 +122,7 @@ class MoEForward(Function):
 policy_fn = None
 
 
-def _fmoe_general_global_forward(inp, gate, expert_fn, n_expert, world_size, expert_counts, experts=None, stored_models=None):
+def _fmoe_general_global_forward(inp, gate, expert_fn, n_expert, world_size, expert_counts,layer_idx, experts=None, stored_models=None):
     # TODO: Using multiple tensors as input is to be supported.
     assert(isinstance(inp, torch.Tensor))
     (
@@ -142,7 +142,7 @@ def _fmoe_general_global_forward(inp, gate, expert_fn, n_expert, world_size, exp
     if stored_models is None:
         # print("updating the stored model")
         stored_models = policy_fn(local_expert_count, global_expert_count,
-                n_expert, world_size, expert_counts)
+                n_expert, world_size, expert_counts,layer_idx)
 
     topk = 1
     if len(gate.shape) == 2:
