@@ -85,6 +85,7 @@ def global_policy(local_expert_count, _gec, num_expert, world_size, expert_count
         global_idx = layer_idx * num_expert + max_idx
 
         # Set the corresponding index in res to True
+        print(global_idx)
         res[global_idx] = True    
 
     # res[1] = True
