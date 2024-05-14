@@ -76,17 +76,10 @@ def global_policy(local_expert_count, _gec, num_expert, world_size, expert_count
     # print(layer_idx)
     # print(expert_counts)
 
-    # Iterate over each layer's expert counts
-    for layer_idx, counts in enumerate(expert_counts):
-        # Find the index of the expert with the maximum count for this layer
-        max_idx = torch.argmax(counts).item()
+    max_idx = torch.argmax(expert_counts[layer_idx]).item()
 
-        # Calculate the global index based on layer index and max index
-        global_idx = layer_idx * num_expert + max_idx
-
-        # Set the corresponding index in res to True
-        print(global_idx)
-        res[global_idx] = True    
+    print(max_idx)
+    res[max_idx] = True    
 
     # res[1] = True
     # for adding the popularity to the res lock the expert to boardcast
