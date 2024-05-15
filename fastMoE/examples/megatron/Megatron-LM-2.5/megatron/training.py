@@ -15,6 +15,7 @@
 
 """Pretrain utilities."""
 
+import modelopt.torch.quantization as atq
 from datetime import datetime
 import math
 import sys
@@ -60,6 +61,14 @@ from megatron.schedules import get_forward_backward_func
 from megatron.utils import report_memory
 
 
+def print_cuda_mem():
+    print("-------------")
+    for i in range(torch.cuda.device_count()):
+        print("DEVICE",i)
+        print("torch.cuda.memory_allocated: %fGB"%(torch.cuda.memory_allocated(i)/1024/1024/1024))
+        print("torch.cuda.memory_reserved: %fGB"%(torch.cuda.memory_reserved(i)/1024/1024/1024))
+        print("torch.cuda.max_memory_reserved: %fGB"%(torch.cuda.max_memory_reserved(i)/1024/1024/1024))
+    print("-------------")
 
 def print_datetime(string):
     """Note that this call will sync across all ranks."""
@@ -72,7 +81,8 @@ def pretrain(train_valid_test_dataset_provider,
              model_provider,
              forward_step_func,
              extra_args_provider=None,
-             args_defaults={}):
+             args_defaults={},
+             quant=False):
     """Main training program.
 
     This function will run the followings in the order provided:
@@ -122,7 +132,7 @@ def pretrain(train_valid_test_dataset_provider,
 
         forward_step_func = patch_forward_step(forward_step_func, Megatron_Version="v2.5")
         model_provider = patch_model_provider(model_provider, Megatron_Version='v2.5')
-
+    print_cuda_mem()
     # Model, optimizer, and learning rate.
     timers('model-and-optimizer-setup').start()
     model, optimizer, lr_scheduler = setup_model_and_optimizer(model_provider)
@@ -147,12 +157,22 @@ def pretrain(train_valid_test_dataset_provider,
     timers('train/valid/test-data-iterators-setup').stop()
     print_datetime('after dataloaders are built')
 
+    print_cuda_mem()
+    if quant:
+        print(len(model))
+        config = atq.FP8_DEFAULT_CFG
+        for module in model:
+            def calibrate_loop():
+                forward_step_func(test_data_iterator,module)
+            atq.quantize(module, config, forward_loop=calibrate_loop    )
     # Print setup timing.
+    print_cuda_mem()
     print_rank_0('done with setup ...')
     timers.log(['model-and-optimizer-setup', 'train/valid/test-data-iterators-setup'])
     print_rank_0('training ...')
 
     iteration = 0
+    """
     if args.do_train and args.train_iters > 0:
         iteration = train(forward_step_func,
                           model, optimizer, lr_scheduler,
@@ -164,11 +184,12 @@ def pretrain(train_valid_test_dataset_provider,
         evaluate_and_print_results(prefix, forward_step_func,
                                    valid_data_iterator, model,
                                    iteration, False)
-
+    """
     if args.save and iteration != 0:
         save_checkpoint(iteration, model, optimizer, lr_scheduler)
 
     if args.do_test:
+        print("inference")
         # Run on test data.
         prefix = 'the end of training for test data'
         evaluate_and_print_results(prefix, forward_step_func,
@@ -356,7 +377,7 @@ def setup_model_and_optimizer(model_provider_func):
         unwrapped_model[0].init_state_dict_from_bert()
         if args.fp16:
             optimizer.reload_model_params()
-
+    
     return model, optimizer, lr_scheduler
 
 
