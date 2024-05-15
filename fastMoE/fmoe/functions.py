@@ -15,8 +15,10 @@ _moe_group = None
 
 def ensure_comm(t, comm):
     if comm is None:
+
         comm = get_torch_default_comm()
     global _moe_group
+
     _moe_group = comm
     fmoe_cuda.ensure_nccl(comm, t)
 
@@ -135,7 +137,6 @@ class MOEScatter(Function):
         else:
             local_input_buf = _local_scatter(inp, pos)
         if world_size > 1:
-
             global_input_buf = fmoe_cuda.global_scatter(
                 local_input_buf,
                 local_expert_count,

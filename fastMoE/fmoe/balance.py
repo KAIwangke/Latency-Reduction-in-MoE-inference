@@ -8,6 +8,18 @@ metrics = {
 }
 
 
+'''
+reset_balance_profile: This function initializes or resets a balance profile.
+ It takes a dictionary balance_dict, the number of layers num_layers, 
+ and a balance strategy balance_strategy. 
+ For each key in the metrics dictionary, it sets the corresponding value 
+ in balance_dict to a list of None values with length equal to num_layers. 
+ 
+ If a balance strategy is provided, 
+ it also adds a key to the balance_dict for the loss associated with that strategy,
+ again initialized to a list of None values.
+
+'''
 def reset_balance_profile(balance_dict, num_layers, balance_strategy):
     for key in metrics:
         balance_dict[key] = [None for _ in range(num_layers)]

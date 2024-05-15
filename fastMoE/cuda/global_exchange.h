@@ -1,5 +1,5 @@
 #include "stream_manager.h"
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 #include <iostream>
 using namespace std;
 
@@ -12,6 +12,14 @@ void fmoe_cuda_expert_exchange_impl(
 
 
 template<typename scalar_t>
+
+/*
+fmoe_cuda_global_scatter_impl: 
+This function scatters input data to different experts across multiple GPUs or nodes. 
+It first calculates the offset for each expert's data in the input buffer (expert_ptr). 
+Then, for each expert, it sends the corresponding data to the GPU/node 
+where the expert is located (ncclSend) and receives data from other GPUs/nodes (ncclRecv).
+*/
 void fmoe_cuda_global_scatter_impl(
     const scalar_t* local_input_buf,
     const long* local_expert_count,
@@ -19,9 +27,6 @@ void fmoe_cuda_global_scatter_impl(
     scalar_t* input_buf,
     size_t in_feat, size_t n_expert, size_t world_size,
     CudaStreamManager* smgr) {
-    printf("getting into the function fmoe_cuda_expert_exchange_impl");
-
-    
     // assert world_size > 1
     int recv_ptr = 0;
     /* TODO: may save for backward */
@@ -34,11 +39,19 @@ void fmoe_cuda_global_scatter_impl(
     for (size_t i = 0; i < n_expert; ++i) {
         NCCL_SAFE_CALL(ncclGroupStart());
         for (size_t j = 0; j < world_size; ++j) {
+            /*
+            The current expert being processed is determined by the loop variables i and j.
+            The line int idx = i + j * n_expert; calculates the index of the current expert.
+            */            
             int idx = i + j * n_expert;
-            printf("idx for which expert: %d",idx);
             if (local_expert_count[idx]) {
+                if(j==0){
+                    printf("local: this is the check for which expert: %d on device: %zu\n", idx, j);
+                }
                 NCCL_SAFE_CALL(ncclSend(
-                        local_input_buf + expert_ptr[idx] * in_feat,
+                        // calculates the total size of the data to send. 
+                        // local_expert_count[idx] gives the number of data elements for the expert
+                        local_input_buf + expert_ptr[idx] * in_feat, 
                         local_expert_count[idx] * in_feat * sizeof(scalar_t),
                         ncclChar,
                         j,
@@ -46,6 +59,10 @@ void fmoe_cuda_global_scatter_impl(
                         smgr->torchStream()));
             }
             if (global_expert_count[idx]) {
+                /*only print the device 0*/
+                if(j==0){
+                    printf("global: this is the check for which expert: %d on device: %zu\n", idx, j);
+                }
                 NCCL_SAFE_CALL(ncclRecv(
                         input_buf + recv_ptr * in_feat,
                         global_expert_count[idx] * in_feat * sizeof(scalar_t),
@@ -107,4 +124,4 @@ void fmoe_cuda_global_gather_impl(
 }
 
 
-#endif  // FMOE_USE_NCCL
+// #endif  // FMOE_USE_NCCL

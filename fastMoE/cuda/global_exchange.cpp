@@ -2,7 +2,7 @@
 #include "utils/fmoe_utils.h"
 #include <torch/extension.h>
 
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 #include <nccl.h>
 
 
@@ -56,8 +56,6 @@ torch::Tensor _global_scatter(
     auto in_feat = input_buf.size(1);
     auto global_input_buf = input_buf.new_empty({batch_size, in_feat});
     auto smgr = getCudaStreamManager(input_buf.device().index());
-    printf("global_scatter");
-    
 
     AT_DISPATCH_FLOATING_TYPES_AND2(at::ScalarType::Half, at::ScalarType::BFloat16,
             input_buf.scalar_type(), "fmoe_cuda_global_scatter", ([&] {
@@ -159,4 +157,4 @@ void _ensure_nccl(c10d::ProcessGroupNCCL& p, torch::Tensor t) {
     }
 }
 
-#endif  // FMOE_USE_NCCL
+// #endif  // FMOE_USE_NCCL

@@ -45,9 +45,9 @@ void CudaStreamManager::sync(int idx) {
 }
 
 void CudaStreamManager::setup(const int device) {
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
     this->ncclgood = 0;
-#endif
+// #endif
     this->device = device;
     checkCudaErrors(cudaSetDevice(device));
     streams = new cudaStream_t[SMGR_N_STREAMS];

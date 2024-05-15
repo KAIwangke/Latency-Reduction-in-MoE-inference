@@ -1,4 +1,4 @@
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 
 #include <cstdlib>
 #include <vector>
@@ -12,7 +12,7 @@ using namespace std;
 
 long pipeline_gran = -1;
 
-int smart_sch_enabled = 0;
+int smart_sch_enabled = 1;
 
 int isSmartSchEnabled() {
     return smart_sch_enabled;
@@ -87,6 +87,7 @@ std::vector<torch::Tensor> _smart_sch_forward(
         setSmartSchEnabled(1);
     }
 
+
     auto smgr = getCudaStreamManager(input_buf.device().index());
     int rank;
     NCCL_SAFE_CALL(ncclCommUserRank(smgr->ncclcomm, &rank));
@@ -99,6 +100,8 @@ std::vector<torch::Tensor> _smart_sch_forward(
     auto global_output_buf = input_buf.new_zeros({global_batch_size, d_model});
     auto output_buf = input_buf.new_zeros({input_buf.size(0), d_model});
 
+
+// the actual function doing the scatter to the device
     std::vector<torch::Tensor> params;
     auto stored_models_ = stored_models.data_ptr<bool>();
     for (long i = 0; i < num_expert * n_workers; ++i) {
@@ -166,8 +169,8 @@ torch::Tensor _smart_sch_backward(
             collect_fn,
             set_grad_fn,
             grad_out.device(),
-
             grad_out.data_ptr<scalar_t>(),
+
             global_grad_out.data_ptr<scalar_t>(),
             global_grad_in.data_ptr<scalar_t>(),
             grad_in.data_ptr<scalar_t>(),
@@ -180,5 +183,5 @@ torch::Tensor _smart_sch_backward(
     }));
     return grad_in;
 }
-#endif
+// #endif
 

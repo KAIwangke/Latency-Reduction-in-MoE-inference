@@ -23,6 +23,7 @@ void exchangeWith(
         scalar_t* recvbuf, size_t recvcount, int t_recv,
         long d_model,
         cudaStream_t stream, ncclComm_t comm) {
+           
     if (sendcount) {
         ncclSend(sendbuf, sendcount * d_model * sizeof(scalar_t),
                 ncclChar, t_send , comm, stream);

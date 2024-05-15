@@ -1,3 +1,43 @@
+diff --git a/megatron/data/indexed_dataset.py b/megatron/data/indexed_dataset.py
+index 12510662..32afb2fa 100644
+--- a/megatron/data/indexed_dataset.py
++++ b/megatron/data/indexed_dataset.py
+@@ -95,7 +95,7 @@ dtypes = {
+     3: np.int16,
+     4: np.int32,
+     5: np.int64,
+-    6: np.float,
++    6: np.float32,
+     7: np.double,
+     8: np.uint16
+ }
+@@ -268,7 +268,7 @@ class IndexedDatasetBuilder(object):
+         np.int16: 2,
+         np.int32: 4,
+         np.int64: 8,
+-        np.float: 4,
++        np.float32: 4,
+         np.double: 8
+     }
+ 
+diff --git a/megatron/optimizer/__init__.py b/megatron/optimizer/__init__.py
+index 823a51f4..32f4b2e1 100644
+--- a/megatron/optimizer/__init__.py
++++ b/megatron/optimizer/__init__.py
+@@ -69,8 +69,10 @@ def get_megatron_optimizer(model):
+ 
+     # Determine whether the params have main-grad field.
+     params_have_main_grad = False
+-    if args.DDP_impl == 'local':
+-        params_have_main_grad = True
++
++    # FastMoE does not have main_grad field
++    # if args.DDP_impl == 'local':
++    #     params_have_main_grad = True
+ 
+     if args.fp16 or args.bf16:
+ 
+
 diff --git a/megatron/arguments.py b/megatron/arguments.py
 index 26a7cec..0acfb22 100644
 --- a/megatron/arguments.py

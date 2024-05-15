@@ -15,8 +15,7 @@ torch::Tensor _linear_forward(
     const auto in_feat = weight.size(2);
 
 #ifdef MOE_DEBUG
-    printf("[forward] expert=%ld, in_feat (d_model)=%ld, out_feat (d_ffn)=%ld\n",
-            num_expert, in_feat, out_feat);
+    printf("[forward] expert=%ld, in_feat (d_model)=%ld, out_feat (d_ffn)=%ld\n", num_expert, in_feat, out_feat);
 #endif
 
     torch::Tensor output;
@@ -94,4 +93,3 @@ std::vector<torch::Tensor> _linear_backward(
 
     return {grad_input_buf, grad_weight, grad_bias};
 }
-

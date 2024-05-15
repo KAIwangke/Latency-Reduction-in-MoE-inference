@@ -218,6 +218,7 @@ class RelPartialLearnableMultiHeadAttn(RelMultiHeadAttn):
         self.r_net = nn.Linear(self.d_model, self.n_head * self.d_head, bias=False)
 
     def forward(self, w, r, r_w_bias, r_r_bias, attn_mask=None, mems=None, layer_idx=None):
+        print(f"Inside RelPartialLearnableMultiHeadAttn, layer_idx: {layer_idx}") 
         qlen, rlen, bsz = w.size(0), r.size(0), w.size(1)
 
         if mems is not None:
@@ -476,7 +477,7 @@ class RelPartialLearnableDecoderLayer(nn.Module):
                                         moe_top_k=kwargs.get('moe_top_k'))
 
     def forward(self, dec_inp, r, r_w_bias, r_r_bias, dec_attn_mask=None, mems=None, layer_idx=None):
-
+        print(f"Inside RelPartialLearnableDecoderLayer, layer_idx: {layer_idx}")
         output = self.dec_attn(dec_inp, r, r_w_bias, r_r_bias,
                                attn_mask=dec_attn_mask,
                                mems=mems,layer_idx=layer_idx)
@@ -559,9 +560,9 @@ class MemTransformerLM(nn.Module):
         super(MemTransformerLM, self).__init__()
         self.n_token = n_token
 
-        self.expert_counts = {}
+        self.experts_popularity = {}
         for i in range(n_layer):
-            self.expert_counts[i] = torch.zeros(moe_num_expert, dtype=torch.long)        
+            self.experts_popularity[i] = torch.zeros(moe_num_expert, dtype=torch.long)        
 
         d_embed = d_model if d_embed is None else d_embed
         self.d_embed = d_embed
@@ -738,6 +739,7 @@ class MemTransformerLM(nn.Module):
             hids.append(core_out)
             for i, layer in enumerate(self.layers):
                 mems_i = None if mems is None else mems[i]
+                print(f"Before calling layer {i}, layer_idx: {i}") 
                 core_out = layer(core_out, pos_emb, self.r_w_bias,
                         self.r_r_bias, dec_attn_mask=dec_attn_mask, mems=mems_i,layer_idx=i)
                 
@@ -746,9 +748,9 @@ class MemTransformerLM(nn.Module):
                     '''
                     transfer the idx back to the device
                     '''
-                    expert_idx = expert_idx.to(self.expert_counts[i].device)
+                    expert_idx = expert_idx.to(self.experts_popularity[i].device)
                     expert_idx = expert_idx % self.moe_num_expert  
-                    self.expert_counts[i][expert_idx] += 1  
+                    self.experts_popularity[i][expert_idx] += 1  
 
 
                 hids.append(core_out)
@@ -763,8 +765,9 @@ class MemTransformerLM(nn.Module):
                     r_emb, r_bias = self.r_emb[i], self.r_bias[i]
 
                 mems_i = None if mems is None else mems[i]
+                print(f"Before calling layer {i}, layer_idx: {i}") 
                 core_out = layer(core_out, r_emb, self.r_w_bias[i],
-                        r_bias, dec_attn_mask=dec_attn_mask, mems=mems_i)
+                        r_bias, dec_attn_mask=dec_attn_mask, mems=mems_i,layer_idx=i)
                 hids.append(core_out)
         elif self.attn_type == 2: # absolute
             pos_seq = torch.arange(klen - 1, -1, -1.0, device=word_emb.device,
@@ -778,10 +781,11 @@ class MemTransformerLM(nn.Module):
             hids.append(core_out)
             for i, layer in enumerate(self.layers):
                 mems_i = None if mems is None else mems[i]
+                print(f"Before calling layer {i}, layer_idx: {i}") 
                 if mems_i is not None and i == 0:
                     mems_i += pos_emb[:mlen]
                 core_out = layer(core_out, dec_attn_mask=dec_attn_mask,
-                                 mems=mems_i)
+                                 mems=mems_i,layer_idx=i)
                 hids.append(core_out)
         elif self.attn_type == 3:
             core_out = self.drop(word_emb)
@@ -789,6 +793,7 @@ class MemTransformerLM(nn.Module):
             hids.append(core_out)
             for i, layer in enumerate(self.layers):
                 mems_i = None if mems is None else mems[i]
+                print(f"Before calling layer {i}, layer_idx: {i}") 
                 if mems_i is not None and mlen > 0:
                     cur_emb = self.r_emb[i][:-qlen]
                     cur_size = cur_emb.size(0)
@@ -801,7 +806,7 @@ class MemTransformerLM(nn.Module):
                 core_out += self.r_emb[i][-qlen:].view(qlen, 1, -1)
 
                 core_out = layer(core_out, dec_attn_mask=dec_attn_mask,
-                                 mems=mems_i)
+                                 mems=mems_i,layer_idx=i)
                 hids.append(core_out)
 
         core_out = self.drop(core_out)
@@ -821,7 +826,7 @@ class MemTransformerLM(nn.Module):
 
         # if epoch is not None:
         for i in range(self.n_layer):
-            self.expert_counts[i] = torch.zeros_like(self.expert_counts[i])        
+            self.experts_popularity[i] = torch.zeros_like(self.experts_popularity[i])        
         hidden, new_mems = self._forward(data, mems=mems)
 
         pred_hid = hidden[-tgt_len:]

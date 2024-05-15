@@ -33,7 +33,7 @@ torch::Tensor _limit_by_capacity(
 }
 
 torch::Tensor _prune_gate_by_capacity(
-        torch::Tensor gate_idx, torch::Tensor expert_count,
+        torch::Tensor gate_idx, torch::Tensor expert_count, 
         long n_expert, long n_worker) {
     auto smgr = getCudaStreamManager(expert_count.device().index());
     auto batch_size = gate_idx.numel();
@@ -77,7 +77,7 @@ T* _d2h(const T* dptr, size_t sz) {
     return _d2h(dptr, hptr, sz);
 }
 
-#ifdef FMOE_USE_NCCL
+// #ifdef FMOE_USE_NCCL
 
 #include <nccl.h>
 
@@ -198,4 +198,4 @@ std::vector<torch::Tensor> _swipe_once(
 
 #undef UPDATE_COUNTERS
 
-#endif
+// #endif
