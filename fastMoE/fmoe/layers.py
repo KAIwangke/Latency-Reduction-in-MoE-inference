@@ -22,8 +22,6 @@ def mark_module_parallel_comm(module, comm):
     for p in module.parameters():
         setattr(p, "dp_comm", comm)
 
-
-
 # commented due to we explicitly using smarter schedule
 # def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, **kwargs):
 #     r"""
@@ -48,6 +46,13 @@ def mark_module_parallel_comm(module, comm):
 #     if len(gate.shape) == 2:
 #         topk = gate.shape[1]
 
+#     def dynamic_scatter_prep( inp, gate_idx):
+#         optimal_index = torch.argsort(gate_idx,dim=0,stable=True)
+#         exp_idx, count_p_expert = gate_idx.unique(return_counts=True)
+#         exp_samples = torch.cumsum(count_p_expert,dim=0)
+#         return optimal_index, exp_samples
+
+#     opt_ind, exp_samples = dynamic_scatter_prep(inp,gate)
 #     def scatter_func(tensor):
 #         # print("scatterfun")
 #         return MOEScatter.apply(
@@ -124,7 +129,7 @@ class FMoE(nn.Module):
         slice_group=None,
         moe_group=None,
         top_k=2,
-        # gate=NoisyGate,
+        #gate=NoisyGate,
         gate = NaiveGate,
         expert=None,
         gate_hook=None,
@@ -223,7 +228,7 @@ class FMoE(nn.Module):
             else:
                 mark_module_parallel_comm(self.experts, comm)
         mark_module_parallel_comm(self.gate, "gate")
-
+    
     def forward(self, moe_inp, layer_idx=None):
         r"""
         The FMoE module first computes gate output, and then conduct MoE forward
@@ -259,7 +264,7 @@ class FMoE(nn.Module):
         # print("forward func layer idx : ",layer_idx)
         # print("getting into the gate")
         gate_top_k_idx, gate_score = self.gate(moe_inp, layer_idx=layer_idx)
-        
+
         if self.gate_hook is not None:
             self.gate_hook(gate_top_k_idx, gate_score, None)
 

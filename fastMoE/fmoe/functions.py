@@ -26,8 +26,20 @@ def ensure_comm(t, comm):
 def get_moe_group():
     return _moe_group
 
+def assign_pos(gate,exp_count,num_expert,world_size):
+    pos = torch.empty((pos_size,), device=gate.device, dtype=torch.long)
+    fmoe_cuda.assign_pos(lec_cum, gate, pos)
+    return pos, local_expert_count, global_expert_count
+
 
 def count_by_gate(gate, num_expert, world_size, require_pos=True):
+    """
+    Args: 
+        gate: Tensor, gating layer output
+        num_expert: int, number of experts
+        world_size: int, number of GPUs
+        require_pos: bool, pos tensor required
+    """
     with torch.no_grad():
         local_expert_count = torch.zeros(
             num_expert * world_size, device=gate.device, dtype=torch.int32
@@ -46,6 +58,8 @@ def count_by_gate(gate, num_expert, world_size, require_pos=True):
         else:
             lec_cum = torch.cumsum(local_expert_count, dim=0).int()
             pos_size = lec_cum[-1].item()
+            #print("pos_size",pos_size)
+            #print(lec_cum)
             pos = torch.empty((pos_size,), device=gate.device, dtype=torch.long)
             fmoe_cuda.assign_pos(lec_cum, gate, pos)
     return pos, local_expert_count, global_expert_count
@@ -76,6 +90,9 @@ def prepare_forward(gate, num_expert, world_size):
         fwd_batch_size,
     )
 
+def scatter_mod(inp,opt_ind):
+    inp_buf = torch.index_select(inp,0,opt_ind[:,0])
+    return inp_buf
 
 def _local_scatter(inp, pos):
     inp_buf = torch.index_select(inp, 0, pos)
@@ -89,6 +106,11 @@ def _local_gather(inp, pos, out_batch_size, maybe_overlap=True):
         inp_buf.index_add_(0, pos, inp)
     else:
         inp_buf.index_copy_(0, pos, inp)
+    return inp_buf
+
+def gather_mod(inp, pos, bsz):
+    inp_buf = torch.zeros(bsz, inp.shape[-1], dtype=inp.dtype, device=inp.device)
+    inp_buf.index_add_(0,torch.reshape(pos, (-1,)),inp)
     return inp_buf
 
 
@@ -108,8 +130,12 @@ class MOEScatter(Function):
         global_expert_count,
         fwd_batch_size,
         world_size,
+        opt_ind=None,
     ):
-        local_input_buf = _local_scatter(inp, pos)
+        if opt_ind is not None:
+            local_input_buf = scatter_mod(inp,opt_ind)
+        else:
+            local_input_buf = _local_scatter(inp, pos)
         if world_size > 1:
             global_input_buf = fmoe_cuda.global_scatter(
                 local_input_buf,
@@ -158,6 +184,7 @@ class MOEGather(Function):
         global_expert_count,
         local_batch_size,
         world_size,
+        opt_ind=None,
     ):
         if world_size > 1:
             local_output_buf = fmoe_cuda.global_gather(
@@ -169,9 +196,12 @@ class MOEGather(Function):
             )
         else:
             local_output_buf = global_output_buf
-        output = _local_gather(local_output_buf, pos, local_batch_size,
+        if opt_ind is not None:
+            output = gather_mod(local_output_buf, opt_ind, local_batch_size)
+        else:
+            output = _local_gather(local_output_buf, pos, local_batch_size,
                 maybe_overlap=False)
-
+            
         ctx.moe_args = (global_output_buf.shape[0], world_size)
         variables = (pos, local_expert_count, global_expert_count)
         ctx.save_for_backward(*variables)
