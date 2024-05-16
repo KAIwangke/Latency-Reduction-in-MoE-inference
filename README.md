@@ -24,7 +24,7 @@ cd fastMoE/examples/megatron/Megatron-LM-2.5/;bash pretrain_gpt_distributed_with
   doi = {10.5281/zenodo.1234},
   month = {12},
   title = {{FastMoE: A Fast Mixture-of-Expert Training System}},
-  url = {[https://github.com/github-linguist/linguist](https://github.com/laekov/fastmoe)},
+  url = {[FastMoE](https://github.com/laekov/fastmoe)},
   version = {1.1.0},
   year = {2024}
 }
